@@ -1,0 +1,4093 @@
+{UTF-8}
+"long-term price change rate"=("indicated long-term DHC price"-"Long-term price component"
+	)/AT DHC price change
+	~	
+	~	OLD: IF THEN ELSE(DHC price >= price cap :AND: indicated DHC price >= DHC price, 0, \
+		IF THEN ELSE(indicated DHC price > DHC price,MIN((indicated DHC price-DHC \
+		price
+		)/AT DHC price change,maximum annual price change rate),MAX((indicated DHC price-DHC \
+		price
+		)/AT DHC price change,-maximum annual price change rate)))
+	|
+
+"initial short-term price component"=IF THEN ELSE ( "SWITCH long-term price increase"\
+		 = 1 , 0 , 0.14 )
+	~	
+	~		|
+
+"SWITCH long-term price increase"=1
+	~	
+	~		|
+
+"indicated long-term DHC price"=IF THEN ELSE("SWITCH short-term price component" = 1,\
+		 ZIDZ(forecasted discounted costs,total forecasted energy sales
+	)
+	, ZIDZ(forecasted discounted costs+Deficit-MAX ( 0 , Reserve-maximum reserve level) \
+		,total forecasted energy sales))
+	~	CHF/kWh
+	~		|
+
+DHC price=IF THEN ELSE ( "SWITCH long-term price increase" = 1, "Long-term price component"\
+		+"Short-term price component" , "Short-term price component" )
+	~	CHF/kWh
+	~		|
+
+"indicated short-term price component"=IF THEN ELSE("SWITCH long-term price increase"\
+		 = 1, (Deficit-MAX(0,Reserve-maximum reserve level)+difference from target cash flow\
+		+(annual costs
+	-"earnings from long-term price"
+	))/SUM(energy delivered
+	[area!]), (Deficit-MAX(0,Reserve-maximum reserve level)+difference from target cash flow\
+		+annual costs)/SUM(energy delivered
+	[area!]) )
+	~	CHF/kWh
+	~	(Deficit-MAX(0,Reserve-maximum reserve level)+(annual costs-"earnings from long-term \
+		price"
+		))/SUM(energy delivered
+		[area!])
+	|
+
+time since investment start storage=MAX ( 0 , Time-year of construction start storage\
+		 )
+	~	
+	~		|
+
+time since investment start transmission=MAX ( 0 , Time-year of construction start transmission\
+		)
+	~	
+	~		|
+
+time until amortization distribution[area]=MIN ( amortization period , planned year of construction start distribution\
+		[area]+amortization period -Time)
+	~	
+	~		|
+
+time until amortization generation=MIN ( amortization period , year of construction start generation\
+		+amortization period -Time)
+	~	Year
+	~		|
+
+time until amortization storage=MIN ( amortization period , year of construction start storage\
+		+amortization period -Time)
+	~	
+	~		|
+
+time until amortization transmission=MIN ( amortization period , year of construction start transmission\
+		+amortization period -Time)
+	~	
+	~		|
+
+time until investment distribution[area]=MAX(0,planned year of construction start distribution\
+		[area]-Time)
+	~	
+	~		|
+
+time until investment generation=MAX(0,year of construction start generation-Time)
+	~	Year
+	~		|
+
+time until investment storage=MAX(0,year of construction start storage-Time)
+	~	
+	~		|
+
+annual amortization distribution[area]=credit for distribution construction[area]/amortization period
+	~	
+	~		|
+
+annual amortization generation=credit generation/amortization period
+	~	
+	~		|
+
+annual amortization storage=credit storage/amortization period
+	~	CHF/Year
+	~		|
+
+annual amortization transmission=credit transmission/amortization period
+	~	CHF/Year
+	~		|
+
+SWITCH mandatory connection=0
+	~	
+	~		|
+
+AT gas[area]=IF THEN ELSE(SWITCH fossil fuel ban = 1, dynamic AT gas[area], 25)
+	~	Year
+	~		|
+
+average annual forecasted energy costs=PV of forecasted energy costs/(time horizon-Time\
+		)
+	~	
+	~		|
+
+share of new heating system from DHC[DHC,area]=IF THEN ELSE(connection mandatory[area\
+		] = 0, EXP(beta*perceived utility of heating systems[DHC,area] )/( EXP(beta*perceived utility of heating systems\
+		[HP,area]*(1-preference for existing system
+	)) + EXP(beta*perceived utility of heating systems[DHC,area])), 1) ~~|
+share of new heating system from DHC[HP,area]=IF THEN ELSE(connection mandatory[area]\
+		 = 0, EXP(beta*perceived utility of heating systems[HP,area]*(1-preference for existing system\
+		) )/( EXP(beta*perceived utility of heating systems
+	[HP,area]*(1-preference for existing system)) + EXP(beta*perceived utility of heating systems\
+		[DHC,area])), 0)
+	~	Dmnl
+	~		|
+
+annual heating costs per apartment[area]=average heating requirements per year[area]*\
+		DHC price/apartments per building
+	~	CHF
+	~		|
+
+share of new heating system from HP[HP,area]=IF THEN ELSE(connection mandatory[area] \
+		= 0, EXP(beta*perceived utility of heating systems[HP,area] )/( EXP(beta*perceived utility of heating systems\
+		[HP,area]) + EXP
+	(beta*perceived utility of heating systems[DHC,area]*(1-preference for existing system\
+		))), 0) ~~|
+share of new heating system from HP[DHC,area]=IF THEN ELSE(connection mandatory[area]\
+		 = 0, EXP(beta*perceived utility of heating systems[DHC,area]*(1-preference for existing system\
+		) )/( EXP(beta*perceived utility of heating systems
+	[HP,area]) + EXP(beta*perceived utility of heating systems[DHC,area]*(1-preference for existing system\
+		))), 1)
+	~	Dmnl
+	~		|
+
+share of new heating system from oil[oil,area]=IF THEN ELSE(fossil fuels banned = 0, \
+		IF THEN ELSE(connection mandatory[area] = 0, EXP(beta*perceived utility of heating systems
+	[oil,area])/(EXP(beta*perceived utility of heating systems[oil,area]) + EXP(beta*perceived utility of heating systems
+	[gas,area]*(1-preference for existing system)) + EXP(beta*perceived utility of heating systems\
+		[DHC,area]*(1-preference for existing system
+	))  + EXP(beta*perceived utility of heating systems[HP,area]*(1-preference for existing system\
+		)) ), 0), 0) ~~|
+share of new heating system from oil[gas,area]=IF THEN ELSE(fossil fuels banned = 0, \
+		IF THEN ELSE(connection mandatory[area] = 0, EXP(beta*perceived utility of heating systems
+	[gas,area] * (1-preference for existing system))/(EXP(beta*perceived utility of heating systems\
+		[oil,area]) + EXP(beta*perceived utility of heating systems
+	[gas,area]*(1-preference for existing system)) + EXP(beta*perceived utility of heating systems
+	[DHC,area]*(1-preference for existing system))  + EXP(beta*perceived utility of heating systems\
+		[HP,area]*(1-preference for existing system
+	))),0), 0) ~~|
+share of new heating system from oil[DHC,area]=IF THEN ELSE(connection mandatory[area\
+		] = 0,
+	IF THEN ELSE(
+	    fossil fuels banned = 0,
+	    EXP(beta * perceived utility of heating systems[DHC, area] * (1 - preference for existing system\
+		)) /
+	    (EXP(beta * perceived utility of heating systems[oil, area]) +
+	     EXP(beta * perceived utility of heating systems[gas, area] * (1 - preference for existing system\
+		)) +
+	     EXP(beta * perceived utility of heating systems[DHC, area] * (1 - preference for existing system\
+		)) +
+	     EXP(beta * perceived utility of heating systems[HP, area] * (1 - preference for existing system\
+		))),
+	    EXP(beta * perceived utility of heating systems[DHC, area]) /
+	    (EXP(beta * perceived utility of heating systems[DHC, area]) +
+	     EXP(beta * perceived utility of heating systems[HP, area]))
+	     ),
+	     1) ~~|
+share of new heating system from oil[HP,area]=IF THEN ELSE(
+	    fossil fuels banned = 0,
+	    EXP(beta * perceived utility of heating systems[HP, area] * (1 - preference for existing system\
+		)) /
+	    (EXP(beta * perceived utility of heating systems[oil, area]) +
+	     EXP(beta * perceived utility of heating systems[gas, area] * (1 - preference for existing system\
+		)) +
+	     EXP(beta * perceived utility of heating systems[DHC, area] * (1 - preference for existing system\
+		)) +
+	     EXP(beta * perceived utility of heating systems[HP, area] * (1 - preference for existing system\
+		))),
+	    EXP(beta * perceived utility of heating systems[HP, area]) /
+	    (EXP(beta * perceived utility of heating systems[DHC, area]) +
+	     EXP(beta * perceived utility of heating systems[HP, area]))
+	)
+	~	
+	~	IF THEN ELSE(fossil fuels banned=0, EXP(beta*perceived utility of heating \
+		systems[HP,area] * (1-preference for existing system))/(EXP(beta*perceived \
+		utility of heating systems[oil,area]) + EXP(beta*perceived utility of \
+		heating systems[gas,area]*(1-preference for existing system)) + \
+		EXP(beta*perceived utility of heating systems[DHC,area]*(1-preference for \
+		existing system))  + EXP(beta*perceived utility of heating \
+		systems[HP,area]*(1-preference for existing system))),
+		EXP(beta*perceived utility of heating systems[HP,area]) \
+		/(EXP(beta*perceived utility of heating systems[DHC,area]) + \
+		EXP(beta*perceived utility of heating systems[HP,area])))
+	|
+
+annualized costs of heating systems per apartment[heating system,area]=annualized costs of heating systems\
+		[heating system,area]/apartments per building
+	~	CHF
+	~		|
+
+annualized costs of HS per apartment for a single area[heating system]=annualized costs of heating systems per apartment\
+		[heating system,area0]
+	~	
+	~		|
+
+apartments per building=10
+	~	
+	~		|
+
+PV of forecasted energy costs during densification[area]=IF THEN ELSE(planned year of densification start\
+		[area] > Time, integral result for densification[area]*energy procurement price
+	*initial planned capacity for connection[area], 0)
+	~	
+	~		|
+
+"short-term unit costs"=annual costs/overall energy delivered
+	~	CHF/kWh
+	~		|
+
+PV of forecasted energy costs during construction[area]=IF THEN ELSE(planned year of densification start\
+		[area] > Time, integral result for construction[area]*energy procurement price*
+	initial planned capacity for connection[area], 0)
+	~	
+	~		|
+
+AT oil[area]=IF THEN ELSE(SWITCH fossil fuel ban = 1, dynamic AT oil[area], 25)
+	~	Year
+	~		|
+
+PV of interest payments distribution per area[area]=IF THEN ELSE(time until amortization distribution\
+		[area] > 0,(EXP(-discount rate*(time until investment distribution[area]
+	+time since investment start distribution[area]+amortization period))*((EXP(discount rate\
+		*time since investment start distribution[area]
+	)*(annual amortization distribution[area]*amortization period*discount rate+annual amortization distribution\
+		[area]-credit for distribution construction[area]
+	*discount rate))-EXP(discount rate*amortization period)*(time since investment start distribution\
+		[area]*annual amortization distribution[area]
+	*discount rate+annual amortization distribution[area]-credit for distribution construction\
+		[area]*discount rate)))/discount rate,0)
+	~	
+	~	IF THEN ELSE(planned year of construction start distribution[area] + amortization \
+		period > Time, (EXP(-(planned year of construction start \
+		distribution[area]+amortization period-Time)*discount rate
+		)*(discount rate*((planned year of construction start \
+		distribution[area]+amortization period-Time)+MAX(0,(amortization \
+		period-(planned year of construction start distribution[area]
+		-Time))/amortization period)-amortization period)+1)-(EXP(-MAX(0,planned year of \
+		construction start distribution[area]-Time))*(discount rate
+		*(MAX(0,planned year of construction start \
+		distribution[area]-Time)+MAX(0,(amortization period-(planned year of \
+		construction start distribution[area]
+		-Time))/amortization period)-amortization period)+1)))/(discount \
+		rate*amortization period)*credit for distribution construction[area],0)
+	|
+
+PV of interest payments generation=IF THEN ELSE(time until amortization generation > \
+		0,(EXP(-discount rate*(time until investment generation
+	+time since investment start generation+amortization period))*((EXP(discount rate*time since investment start generation
+	)*(annual amortization generation*amortization period*discount rate+annual amortization generation\
+		-credit generation
+	*discount rate))-EXP(discount rate*amortization period)*(time since investment start generation\
+		*annual amortization generation
+	*discount rate+annual amortization generation-credit generation*discount rate)))/discount rate\
+		,0)
+	~	CHF
+	~	IF THEN ELSE(year of construction start generation+amortization period > Time, (EXP(-
+		(year of construction start generation+amortization period-Time)*discount rate
+		)*(discount rate*((year of construction start generation+amortization \
+		period-Time)+MAX(0,(amortization period-(year of construction start \
+		generation
+		-Time))/amortization period)-amortization period)+1)-(EXP(-MAX(0,year of \
+		construction start generation-Time))*(discount rate
+		*(MAX(0,year of construction start generation-Time)+MAX(0,(amortization period-(year \
+		of construction start generation
+		-Time))/amortization period)-amortization period)+1)))/(discount rate*amortization \
+		period)*credit generation, 0)
+		
+		
+		IF THEN ELSE(time until amortization generation > 0,(EXP(-discount \
+		rate*(time until investment generation+time since investment start \
+		generation+time until amortization generation))*((EXP(discount rate*time \
+		since investment start generation)*(annual amortization generation*time \
+		until amortization generation*discount rate+annual amortization \
+		generation-credit generation*discount rate))-EXP(discount rate*time until \
+		amortization generation)*(time since investment start generation*annual \
+		amortization generation*discount rate+annual amortization \
+		generation-credit generation*discount rate)))/discount rate,0)
+	|
+
+PV of interest payments storage=IF THEN ELSE(time until amortization storage > 0,(EXP\
+		(-discount rate*(time until investment storage
+	+time since investment start storage+amortization period))*((EXP(discount rate*time since investment start storage
+	)*(annual amortization storage*amortization period*discount rate+annual amortization storage\
+		-credit storage
+	*discount rate))-EXP(discount rate*amortization period)*(time since investment start storage\
+		*annual amortization storage
+	*discount rate+annual amortization storage-credit storage*discount rate)))/discount rate\
+		,0)
+	~	
+	~		|
+
+PV of interest payments transmission=IF THEN ELSE(time until amortization transmission\
+		 > 0,(EXP(-discount rate*(time until investment transmission
+	+time since investment start transmission+amortization period))*((EXP(discount rate*\
+		time since investment start transmission
+	)*(annual amortization transmission*amortization period*discount rate+annual amortization transmission\
+		-credit transmission
+	*discount rate))-EXP(discount rate*amortization period)*(time since investment start transmission\
+		*annual amortization transmission
+	*discount rate+annual amortization transmission-credit transmission*discount rate)))\
+		/discount rate,0)
+	~	CHF
+	~		|
+
+target cash flow=100000
+	~	
+	~		|
+
+time until investment transmission=MAX(0,year of construction start transmission-Time\
+		)
+	~	
+	~		|
+
+time since investment start distribution[area]=MAX ( 0 , Time-planned year of construction start distribution\
+		[area] )
+	~	
+	~		|
+
+time since investment start generation=MAX ( 0 , Time-year of construction start generation\
+		 )
+	~	Year
+	~		|
+
+difference from target cash flow=target cash flow-annual cash flow
+	~	CHF/Year
+	~		|
+
+year of mandatory connection=2020
+	~	
+	~		|
+
+share of new heating system from gas[gas,area]=IF THEN ELSE(fossil fuels banned = 0, \
+		IF THEN ELSE(connection mandatory[area] = 0, EXP(beta*perceived utility of heating systems
+	[gas,area] )/( EXP(beta*perceived utility of heating systems[gas,area]) + 
+	EXP(beta*perceived utility of heating systems[DHC,area]
+	*(1-preference for existing system))  + EXP(beta*perceived utility of heating systems\
+		[HP,area]*(1-preference for existing system
+	))),0), 0 ) ~~|
+share of new heating system from gas[DHC,area]=IF THEN ELSE(connection mandatory[area\
+		] = 0,
+	IF THEN ELSE(
+	    fossil fuels banned = 0,
+	    EXP(beta * perceived utility of heating systems[DHC, area] * (1 - preference for existing system\
+		)) /
+	    (EXP(beta * perceived utility of heating systems[gas, area]) +
+	     EXP(beta * perceived utility of heating systems[DHC, area] * (1 - preference for existing system\
+		)) +
+	     EXP(beta * perceived utility of heating systems[HP, area] * (1 - preference for existing system\
+		))),
+	    EXP(beta * perceived utility of heating systems[DHC, area]) /
+	    (EXP(beta * perceived utility of heating systems[DHC, area]) +
+	     EXP(beta * perceived utility of heating systems[HP, area]))),
+	     1
+	) ~~|
+share of new heating system from gas[HP,area]=IF THEN ELSE(
+	    fossil fuels banned = 0,
+	    EXP(beta * perceived utility of heating systems[HP, area] * (1 - preference for existing system\
+		)) /
+	    (EXP(beta * perceived utility of heating systems[gas, area]) +
+	     EXP(beta * perceived utility of heating systems[DHC, area] * (1 - preference for existing system\
+		)) +
+	     EXP(beta * perceived utility of heating systems[HP, area] * (1 - preference for existing system\
+		))),
+	    EXP(beta * perceived utility of heating systems[HP, area]) /
+	    (EXP(beta * perceived utility of heating systems[DHC, area]) +
+	     EXP(beta * perceived utility of heating systems[HP, area]))
+	)
+	~	Dmnl
+	~		|
+
+PV of forecasted energy costs after completion[area]=IF THEN ELSE(planned year of densification start\
+		[area] > Time, integral result after completion[area]*energy procurement price*initial planned capacity for connection
+	[area], 0)
+	~	
+	~		|
+
+connection mandatory[area]=IF THEN ELSE ( SWITCH mandatory connection = 1 :AND: year of mandatory connection\
+		 <= Time :AND: Available capacity for sale[area] > 0 , 1 , 0 )
+	~	
+	~		|
+
+number of buildings per area[area]=initial buildings with gas heating[area]+initial buildings with oil heating\
+		[area]+initial connected buildings[area]+initial number of HPs[area]
+	~	
+	~		|
+
+PV of forecasted energy costs in old grids[area]=integral result in old grids[area]*energy procurement price\
+		*(initial capacity per area
+	[area]+initial connected anchor loads per area[area]+initial planned capacity for connection\
+		[area]+initial committed anchor loads per area[area])
+	~	
+	~		|
+
+actual demand trend[area]=SMOOTH ( capacity taken by newly committed buildings[area]-\
+		energy efficiency gains of connected buildings[area]-freeing capacity from buildings disconnecting\
+		[area] , 5)
+	~	kWh/Year
+	~	ZIDZ(Cumulated demand change in old grids[area],(Time-INITIAL TIME))
+	|
+
+minimum estimated demand at time horizon[area]=(initial capacity per area[area]+initial connected anchor loads per area\
+		[
+	area]+initial planned capacity for connection[area]+initial committed anchor loads per area\
+		[area])*minimum share of target at time horizon
+	~	
+	~		|
+
+mo[area]=ZIDZ(actual demand trend[area],initial capacity per area[area]+initial connected anchor loads per area\
+		[area]+initial planned capacity for connection[area]+initial committed anchor loads per area\
+		[area])
+	~	
+	~		|
+
+y1o[area]=ZIDZ(energy delivered[area],initial capacity per area[area]+initial connected anchor loads per area\
+		[area]+initial planned capacity for connection[area]+initial committed anchor loads per area\
+		[area])
+	~	
+	~		|
+
+forecasted energy sales after completion[area]=IF THEN ELSE(planned year of densification start\
+		[area] > Time, integral result after completion[area]*initial planned capacity for connection
+	[area], 0)
+	~	
+	~	IF THEN ELSE ( y5[area] = 1 , time horizon-x4[area] , 0) * initial planned capacity \
+		for connection
+		[area]
+	|
+
+forecasted energy sales during construction[area]=IF THEN ELSE(planned year of densification start\
+		[area] > Time, integral result for construction[area]*initial planned capacity for connection
+	[area], 0)
+	~	
+	~	(0.5*(x2[area]-x1[area])*(y1[area]+y3[area]))*initial planned capacity for connection
+		[area]
+	|
+
+forecasted energy sales during densification[area]=IF THEN ELSE(planned year of densification start\
+		[area] > Time, initial planned capacity for connection[area]*integral result for densification
+	[area], 0)
+	~	
+	~		|
+
+forecasted energy sales in old grids[area]=IF THEN ELSE ( initial capacity per area[area\
+		] > 0 :OR: planned year of densification start[area] <= Time , integral result in old grids\
+		[area] * (initial capacity per area[area]+initial committed anchor loads per area[area\
+		]+initial connected anchor loads per area[area]+initial planned capacity for connection\
+		[area]) , 0 )
+	~	
+	~	IF THEN ELSE(initial capacity per area[area] > 0 :OR: planned year of densification \
+		start
+		[area] <= Time, IF THEN ELSE ( estimated year where maximum demand will be reached
+		[area] >= time horizon, IF THEN ELSE(estimated demand at time horizon[area] > \
+		minimum estimated demand at time horizon[
+		area
+		],0.5*(time horizon-Time)*(energy delivered[area]+estimated demand at time \
+		horizon[area]),0.5*(time horizon-Time)*(energy delivered
+		[area]+minimum estimated demand at time horizon[area])) , 0.5*(estimated year where \
+		maximum demand will be reached[area
+		]
+		-Time)*(energy delivered[area]+(initial capacity per area[area]+initial connected \
+		anchor loads per area[area])) + (time horizon
+		-estimated year where maximum demand will be reached
+		[area])*(initial capacity per area[area]+initial connected anchor loads \
+		per area[area])),0)
+	|
+
+average forecasted annual energy sales=SUM(average forecasted annual energy sales per area\
+		[area!])
+	~	
+	~		|
+
+estimated share at time horizon in old grids[area]=estimated demand at time horizon[area\
+		]/target capacity per area[area]
+	~	
+	~		|
+
+overall demand trend=SUM(actual demand trend[area!])
+	~	kWh/Year
+	~		|
+
+estimated year where maximum demand will be reached[area]=SMOOTH(IF THEN ELSE ( energy delivered\
+		[area]>= initial capacity per area
+	[area] + initial connected anchor loads per area[area]+initial planned capacity for connection\
+		[area]+initial committed anchor loads per area[area] , Time , IF THEN ELSE ( actual demand trend\
+		[area] > 0 , Time + ZIDZ
+	 ( (initial capacity per area[area]+initial connected anchor loads per area[area]+initial planned capacity for connection\
+		[area]+initial committed anchor loads per area[area])-energy delivered
+	[area] , actual demand trend[area])  , time horizon)  ),1)
+	~	
+	~		|
+
+target capacity per area[area]=initial capacity per area[area]+initial committed anchor loads per area\
+		[area]+initial connected anchor loads per area[area]+initial planned capacity for connection\
+		[area]
+	~	
+	~		|
+
+availability utility penalty[DHC,area]= WITH LOOKUP (IF THEN ELSE(SWITCH availability utility\
+		 = 1, IF THEN ELSE(initial planned capacity for connection
+	[area] = 0, (energy delivered to buildings[area]+SUM(Buildings committed to DHC[area\
+		,heating system!]*average heating requirements per year[area]))/initial capacity per area
+	[area],(energy delivered to buildings[area]+SUM(Buildings committed to DHC[area,heating system\
+		!]*average heating requirements per year[area]))/initial planned capacity for connection\
+		[area]), 0),
+		  ([(0,0)-(1,1)],(0,1), (0.65,1), (0.8,0.8), (0.9,0.6), (0.95,0.3), (0.99,0), (1,0)\
+		)) ~~|
+availability utility penalty[gas,area]=1 ~~|
+availability utility penalty[oil,area]=1 ~~|
+availability utility penalty[HP,area]=1
+	~	
+	~	Quick fix to account for old and new areas
+	|
+
+estimated demand at time horizon[area]=MIN(energy delivered[area]+actual demand trend\
+		[area]*(time horizon-Time),initial capacity per area
+	[area]+initial connected anchor loads per area[area]+initial planned capacity for connection\
+		[area]+initial committed anchor loads per area[area])
+	~	
+	~		|
+
+y2o[area]=ZIDZ(MAX(estimated demand at time horizon[area],minimum estimated demand at time horizon\
+		[area]),initial capacity per area
+	[area]+initial connected anchor loads per area[area]+initial planned capacity for connection\
+		[area]+initial committed anchor loads per area[area])
+	~	
+	~		|
+
+annual cash flow after deficit reduction=annual cash flow-deficit decrease
+	~	CHF/Year
+	~		|
+
+Familiarity with HP in MFH= INTEG (HP familiarity gain,
+		initial familiarity with HP in MFH)
+	~	
+	~		|
+
+initial familiarity with HP in MFH=0.3
+	~	
+	~		|
+
+smoothed annual cash flow=
+	SMOOTH ( annual cash flow , 1)
+	~	CHF/Year
+	~		|
+
+costs per energy delivered=annual costs/SUM(energy delivered[area!])
+	~	
+	~		|
+
+annual costs=interests from investments+operation and maintenance costs+procurement costs\
+		+amortization+interests from deficit
+	~	CHF/Year
+	~		|
+
+smoothed cash flow after deficit reduction=SMOOTH(annual cash flow after deficit reduction\
+		, 1)
+	~	CHF/Year
+	~		|
+
+new planned capacity for regular buildings=SUM(initial planned capacity for connection\
+		[area!])
+	~	kWh
+	~		|
+
+PV of interest payments distribution=SUM(PV of interest payments distribution per area\
+		[area!])
+	~	
+	~		|
+
+HP familiarity due to WOM=overall market share of heating systems[HP]*0.01*effective contact rate
+	~	
+	~		|
+
+effective contact rate=0.2
+	~	
+	~		|
+
+overall heating demand by area[area]=(Buildings with oil heating[area]+Buildings with gas heating\
+		[area]+Buildings with decentral HP
+	[area]+Buildings connected to DHC[area]+SUM(Buildings committed to DHC[area,heating system\
+		!]))*average heating requirements per year
+	[area]+Connected anchor loads[area]+Committed anchor loads[area]
+	~	kWh
+	~		|
+
+"PV of storage O&M"=IF THEN ELSE ( year of storage commissioning > Time , (EXP(-(year of storage commissioning\
+		-Time)*discount rate
+	) - EXP(-(year of storage commissioning-Time+amortization period)*discount rate))/discount rate\
+		 , 0 )*credit storage*"O&M fraction"
+	~	CHF
+	~		|
+
+"PV of transmission O&M"=IF THEN ELSE ( year of construction start transmission > Time\
+		 , (EXP(-(year of construction start transmission-Time)*discount rate
+	) - EXP(-(year of construction start transmission-Time+amortization period)*discount rate\
+		))/discount rate , 0 )*credit transmission*"O&M fraction"
+	~	
+	~		|
+
+energy delivered by heating system[oil]=SUM(Buildings with oil heating[area!]*average heating requirements per year\
+		[area
+	!]) + SUM(Buildings committed to DHC[area!,oil]*average heating requirements per year\
+		[area!]) ~~|
+energy delivered by heating system[gas]=SUM(Buildings with gas heating[area!]*average heating requirements per year\
+		[area
+	!]) + SUM(Buildings committed to DHC[area!,gas]*average heating requirements per year\
+		[area!]) + SUM(Committed anchor loads[area!]) ~~|
+energy delivered by heating system[HP]=SUM(Buildings with decentral HP[area!]*average heating requirements per year\
+		[area
+	!]) + SUM(Buildings committed to DHC[area!,HP]*average heating requirements per year\
+		[area!]) ~~|
+energy delivered by heating system[DHC]=SUM(Buildings connected to DHC[area!]*average heating requirements per year\
+		[area
+	!]) +SUM(Connected anchor loads[area!])
+	~	
+	~		|
+
+perceived utility of heating systems[heating system,area] :EXCEPT: [HP,area]=(convenience utility term\
+		[heating system
+	]+financial utility term[heating system,area]+market value utility term[heating system
+	]+upfront cost utility term[heating system])*time utility penalty[heating system,area\
+		]*availability utility penalty[heating system
+	,area] ~~|
+perceived utility of heating systems[HP,area]=(convenience utility term[HP
+	]+financial utility term[HP,area]+market value utility term[HP
+	]+upfront cost utility term[HP])*time utility penalty[HP,area]*availability utility penalty\
+		[HP
+	,area]*IF THEN ELSE(SWITCH finOnly = 1, 1, Familiarity with HP in MFH)
+	~	
+	~		|
+
+total planned capacity=SUM(initial capacity per area[area!]) + SUM(initial planned capacity for connection\
+		[area!]) + SUM(initial committed anchor loads per area[area!]) + SUM(initial connected anchor loads per area\
+		[area!])
+	~	
+	~		|
+
+annual DHW use=42000
+	~	kWh
+	~		|
+
+average heating requirements per year[area]=(Average heat loss coefficient of buildings\
+		[area]*"average degree-days"*24/1000) + annual DHW use
+	~	
+	~		|
+
+current share of target demand[area]=ZIDZ(energy delivered[area],initial planned capacity for connection\
+		[area]+initial committed anchor loads per area
+	[area]+initial connected anchor loads per area[area]+initial capacity per area[area]\
+		)
+	~	
+	~		|
+
+overall heating demand=SUM(Buildings committed to DHC[area!,heating system!]*average heating requirements per year\
+		[area!
+	]) + SUM(Buildings connected to DHC[area!]*average heating requirements per year[area\
+		!]) + SUM(Buildings with decentral HP
+	[area!]*average heating requirements per year[area!])+SUM(Buildings with gas heating\
+		[area!]*average heating requirements per year
+	[area!]) + SUM(Buildings with oil heating[area!]*average heating requirements per year\
+		[area!])+SUM(Connected anchor loads
+	[area!]) + SUM(Committed anchor loads[area!])
+	~	
+	~		|
+
+HP familiarity gain=HP familiarity due to WOM*(1-Familiarity with HP in MFH)
+	~	
+	~		|
+
+new planned capacity=new planned capacity for regular buildings+ SUM ( initial committed anchor loads per area\
+		[area!] )
+	~	kWh
+	~		|
+
+overall utilization=SUM(energy delivered[area!])/(SUM(initial capacity per area[area!\
+		])+SUM(initial committed anchor loads per area[area!])+SUM(initial connected anchor loads per area\
+		[area!]) + SUM(initial planned capacity for connection[area!]))
+	~	
+	~		|
+
+total number of buildings=SUM(initial buildings with gas heating[area!]) + SUM(initial buildings with oil heating\
+		[area!]
+	) + SUM(initial connected buildings[area!]) + SUM(initial number of HPs[area!])
+	~	Building
+	~		|
+
+"PV of new O&M costs at system level"="PV of storage O&M"+"PV of generation O&M"+"PV of transmission O&M"
+	~	
+	~		|
+
+total investment sum=SUM(credit for distribution construction[area!])+credit generation\
+		+credit storage+credit transmission
+	~	
+	~		|
+
+"PV of generation O&M"=IF THEN ELSE ( year of construction start generation > Time , \
+		(EXP(-(year of construction start generation-Time)*discount rate
+	) - EXP((-(year of construction start generation-Time+amortization period))*discount rate\
+		))/discount rate , 0 )*credit generation*"O&M fraction"
+	~	
+	~		|
+
+interests from investments=total debt from investments*discount rate
+	~	
+	~		|
+
+initial deficit=0
+	~	
+	~		|
+
+"earnings from long-term price"="Long-term price component"*SUM(energy delivered[area\
+		!])
+	~	CHF/Year
+	~		|
+
+"earnings from short-term price"="Short-term price component"*SUM(energy delivered[area\
+		!])
+	~	CHF/Year
+	~		|
+
+weight of upfront utility=IF THEN ELSE ( SWITCH finOnly = 1 , 0 , 0.25 )
+	~	
+	~		|
+
+withdrawal from reserve=IF THEN ELSE ( annual cash flow < 0 , MIN ( -annual cash flow\
+		 , Reserve )  , 0 )
+	~	CHF/Year
+	~		|
+
+Deficit= INTEG (deficit increase-deficit decrease,
+		initial deficit)
+	~	CHF
+	~		|
+
+deficit decrease=IF THEN ELSE ( annual cash flow > 0 :AND: Deficit > 0 , MIN ( annual cash flow\
+		 , Deficit)  , 0 )
+	~	CHF/Year
+	~		|
+
+initial reserve=2e+07
+	~	
+	~		|
+
+deficit increase=IF THEN ELSE ( annual cash flow < 0 , MAX(-annual cash flow-Reserve,\
+		 0) , 0 )
+	~	CHF/Year
+	~		|
+
+weight of convenience utility=IF THEN ELSE ( SWITCH finOnly = 1 , 0 , 0.25 )
+	~	
+	~		|
+
+weight of financial utility=IF THEN ELSE(SWITCH finOnly = 1, 1, 0.25)
+	~	
+	~		|
+
+preference for existing system=IF THEN ELSE ( SWITCH finOnly = 1 , 0 , 0.3 )
+	~	Dmnl
+	~	0.3
+	|
+
+weight of market utility=IF THEN ELSE ( SWITCH finOnly = 1 , 0 , 0.25 )
+	~	
+	~		|
+
+Reserve= INTEG (deposit into reserve-withdrawal from reserve,
+		initial reserve)
+	~	CHF
+	~		|
+
+interests from deficit=Deficit*discount rate
+	~	
+	~		|
+
+SWITCH finOnly=0
+	~	
+	~		|
+
+deposit into reserve=IF THEN ELSE ( annual cash flow > 0 , MAX ( annual cash flow-Deficit\
+		 , 0 )  , 0 )
+	~	CHF/Year
+	~		|
+
+PV of forecasted interests=0
+	~	
+	~	OLD:
+		IF THEN ELSE ( Reserve or Deficit < 0 , ((-Reserve or Deficit*discount \
+		rate)-((-Reserve or Deficit
+		*discount rate)*EXP ( -(time horizon-Time)*discount rate ) ))/discount \
+		rate , 0 )
+	|
+
+years between starting new constructions=1
+	~	
+	~		|
+
+number of gas heating systems replaced[area]=Buildings with gas heating[area]/average lifetime of gas heating systems
+	~	
+	~		|
+
+Buildings with gas heating[area]= INTEG (oil to gas[area]-gas to DHC[area]-gas to HP[\
+		area],
+		initial buildings with gas heating[area])
+	~	
+	~		|
+
+Buildings with oil heating[area]= INTEG (-oil to DHC[area]-oil to gas[area]-oil to HP\
+		[area],
+		initial buildings with oil heating[area])
+	~	
+	~		|
+
+capacity freeing rate[area]=energy efficiency gains of connected buildings[area]+freeing capacity from buildings disconnecting\
+		[area]
+	~	
+	~		|
+
+decrease in age of gas heating systems[area]=number of gas heating systems replaced[area\
+		]*average age of gas heating systems[area]
+	~	
+	~		|
+
+rate of heat loss coefficient improvement[area]=initial heat loss coefficient of buildings\
+		[area]*heat loss coeffient improvement percentage
+	~	
+	~		|
+
+anchor load connection rate[area]=IF THEN ELSE(planned year of construction start distribution\
+		[area] <= Time, ZIDZ(Committed anchor loads[area],construction time for distribution construction\
+		[area]),0)
+	~	
+	~		|
+
+initial total age of gas heating systems[area]=initial average age of gas heating systems\
+		[area]*initial buildings with gas heating[area]
+	~	
+	~		|
+
+annual revenues=DHC price*SUM(energy delivered[area!])
+	~	CHF/Year
+	~		|
+
+initial total age of oil heating systems[area]=initial average age of oil heating systems\
+		[area]*initial buildings with oil heating[area]
+	~	
+	~		|
+
+"AT short-term price adjustment"=2
+	~	Year
+	~		|
+
+dynamic AT gas[area]=MAX(1,lookup excess age of gas heating systems(excess age of gas heating systems\
+		[area])*average lifetime of gas heating systems)
+	~	
+	~		|
+
+Available capacity for connection[area]= INTEG (capacity implementation rate[area]+capacity freeing rate\
+		[area]-available capacity decrease[area],
+		0)
+	~	
+	~		|
+
+planned year of construction start distribution[area0]=0 ~~|
+planned year of construction start distribution[area1]=overall year of construction start distribution\
+		 ~~|
+planned year of construction start distribution[area2]=overall year of construction start distribution\
+		 + years between starting new constructions ~~|
+planned year of construction start distribution[area3]=overall year of construction start distribution\
+		 + years between starting new constructions*2 ~~|
+planned year of construction start distribution[area4]=overall year of construction start distribution\
+		 + years between starting new constructions*3 ~~|
+planned year of construction start distribution[area5]=overall year of construction start distribution\
+		 + years between starting new constructions*4
+	~	
+	~		|
+
+heat loss coeffient improvement percentage=0.01
+	~	
+	~		|
+
+lookup excess age of gas heating systems([(0,0)-(10,10)],(0,1), (10,0))
+	~	
+	~		|
+
+lookup excess age of oil heating systems([(0,0)-(10,1)],(0,1), (10,0))
+	~	
+	~		|
+
+average age of gas heating systems[area]=ZIDZ(Total age of gas heating systems[area],\
+		Buildings with gas heating[area])
+	~	
+	~		|
+
+energy delivered[area]=energy delivered to buildings[area]+Connected anchor loads[area\
+		]
+	~	
+	~		|
+
+average age of oil heating systems[area]=ZIDZ ( Total age of oil heating systems[area\
+		] , Buildings with oil heating[area] )
+	~	
+	~		|
+
+energy delivered to buildings[area]=average heating requirements per year[area]*Buildings connected to DHC\
+		[area]
+	~	kWh
+	~		|
+
+"short-term price adjustment rate"=IF THEN ELSE("SWITCH short-term price component" =\
+		 1, ("indicated short-term price component"-"Short-term price component")/"AT short-term price adjustment"\
+		, 0)
+	~	
+	~		|
+
+"Short-term price component"= INTEG ("short-term price adjustment rate",
+		"initial short-term price component")
+	~	CHF/kWh
+	~		|
+
+energy prices for heating systems[oil]=oil price ~~|
+energy prices for heating systems[gas]=gas price ~~|
+energy prices for heating systems[DHC]=DHC price ~~|
+energy prices for heating systems[HP]=electricity price/heat pump COP
+	~	
+	~		|
+
+average lifetime of gas heating systems=25
+	~	Year
+	~		|
+
+credit storage=IF THEN ELSE ( SWITCH storage = 1 , value credit storage, 0 )
+	~	
+	~		|
+
+average lifetime of oil heating systems=25
+	~	
+	~		|
+
+storage commissioned=IF THEN ELSE(year of construction start storage > 0 :AND: Remaining construction time storage\
+		 = 0 :AND: SWITCH storage = 1, 
+	1, 0)
+	~	
+	~		|
+
+storage effect on energy procurement price=IF THEN ELSE(SWITCH storage effect on price\
+		 = 1, 0.025, 0)
+	~	
+	~		|
+
+excess age of gas heating systems[area]=MAX(0,average age of gas heating systems[area\
+		]-average lifetime of gas heating systems)
+	~	
+	~		|
+
+excess age of oil heating systems[area]=MAX(0,average age of oil heating systems[area\
+		]-average lifetime of oil heating systems)
+	~	
+	~		|
+
+SWITCH availability utility=1
+	~	
+	~		|
+
+increase in age of oil heating systems[area]=Buildings with oil heating[area]*ageing rate
+	~	
+	~		|
+
+value credit storage=5e+07
+	~	
+	~		|
+
+dynamic AT oil[area]=MAX(1,lookup excess age of oil heating systems(excess age of oil heating systems\
+		[area])*average lifetime of oil heating systems)
+	~	
+	~		|
+
+"SWITCH short-term price component"=1
+	~	
+	~		|
+
+SWITCH storage=0
+	~	
+	~		|
+
+capacity implementation rate[area]=IF THEN ELSE(Planned capacity for connection[area]\
+		 > 0, ZIDZ(initial planned capacity for connection[area],construction time for distribution construction\
+		[area])*construction speed distribution[area], 0)
+	~	
+	~		|
+
+maximum reserve level=2e+07
+	~	
+	~		|
+
+increase in age of gas heating systems[area]=Buildings with gas heating[area]*ageing rate
+	~	
+	~		|
+
+decrease in age of oil heating systems[area]=number of oil heating systems replaced[area\
+		]*average age of oil heating systems[area]
+	~	
+	~		|
+
+remaining demand to connect[area]=initial planned capacity for connection[area]+initial committed anchor loads per area\
+		[area]+initial connected anchor loads per area[area]-energy delivered[area]
+	~	
+	~		|
+
+Total age of gas heating systems[area]= INTEG (increase in age of gas heating systems\
+		[area]-decrease in age of gas heating systems[area],
+		initial total age of gas heating systems[area])
+	~	
+	~		|
+
+Total age of oil heating systems[area]= INTEG (increase in age of oil heating systems\
+		[area]-decrease in age of oil heating systems[area],
+		initial total age of oil heating systems[area])
+	~	
+	~		|
+
+total connection rate[area]=(DHC connection rate[area,oil]+DHC connection rate[area,gas\
+		]+DHC connection rate[area
+	,HP])*average heating requirements per year[area]
+	~	
+	~		|
+
+overall year of construction start distribution=2025
+	~	
+	~		|
+
+Planned capacity for connection[area]= INTEG (-capacity implementation rate[area],
+		initial planned capacity for connection[area])
+	~	
+	~		|
+
+initial buildings with gas heating[area]=200
+	~	
+	~	Old: 500
+	|
+
+SWITCH storage effect on price=0
+	~	
+	~		|
+
+construction speed generation=IF THEN ELSE(year of construction start generation<=Time\
+		 :AND: Remaining construction time generation > 0, 1, 0)
+	~	
+	~		|
+
+initial buildings with oil heating[area]=200
+	~	
+	~	Old: 500
+	|
+
+initial average age of gas heating systems[area]=20
+	~	
+	~		|
+
+total connected buildings=SUM(Buildings connected to DHC[area!])
+	~	
+	~		|
+
+number of oil heating systems replaced[area]=Buildings with oil heating[area]/average lifetime of oil heating systems
+	~	
+	~		|
+
+initial average age of oil heating systems[area]=20
+	~	
+	~		|
+
+Debt storage= INTEG (new debt storage-debt amortization storage,
+		0)
+	~	CHF
+	~		|
+
+Debt transmission= INTEG (new debt transmission-debt amortization transmission,
+		0)
+	~	CHF
+	~		|
+
+debt amortization distribution[area]=IF THEN ELSE ( Debt distribution[area] > 0 , credit for distribution construction\
+		[area]/amortization period, 0 )
+	~	CHF/Year
+	~		|
+
+debt amortization generation=IF THEN ELSE ( Debt generation > 0, credit generation/amortization period\
+		 , 0 )
+	~	CHF/Year
+	~		|
+
+debt amortization storage=IF THEN ELSE ( Debt storage > 0 , credit storage/amortization period\
+		 , 0 )
+	~	CHF/Year
+	~		|
+
+amortization=SUM(debt amortization distribution[area!])+debt amortization generation+\
+		debt amortization storage+debt amortization transmission
+	~	
+	~		|
+
+amortization period=40
+	~	Year
+	~		|
+
+amortization start year=2032.12
+	~	
+	~		|
+
+Debt distribution[area]= INTEG (new debt distribution[area]-debt amortization distribution\
+		[area],
+		0)
+	~	CHF
+	~		|
+
+fixed time horizon=2075
+	~	
+	~		|
+
+new debt distribution[area]=distribution spending[area]
+	~	CHF/Year
+	~		|
+
+total debt from investments=Debt transmission+Debt storage+Debt generation+SUM ( Debt distribution\
+		[area!] )
+	~	CHF
+	~		|
+
+new debt transmission=transmission spending
+	~	CHF/Year
+	~		|
+
+"PV of interests for new system-level investments"=PV of interest payments generation\
+		+PV of interest payments storage+PV of interest payments transmission
+	~	
+	~		|
+
+PV of outstanding generation investments=IF THEN ELSE(year of construction start generation\
+		 + amortization period > Time, IF THEN ELSE ( year of construction start generation\
+		 > Time , (EXP(-(year of construction start generation-Time)*discount rate)-EXP(-(year of construction start generation\
+		+amortization period-Time)*discount rate))/(discount rate*amortization period) , ZIDZ\
+		(1-EXP(-(year of construction start generation+amortization period-Time)*discount rate\
+		), discount rate*amortization period) ) * credit generation, 0)
+	~	
+	~		|
+
+forecasted discounted costs=PV of forecasted energy costs+"PV of new O&M costs"+PV of outstanding distribution investments
+	+"PV of O&M costs of existing infrastructure"+PV of forecasted interests+"PV of outstanding system-level investments"
+	+"PV of new O&M costs at system level"+"PV of interests for new system-level investments"\
+		+PV of interest payments distribution
+	~	
+	~		|
+
+debt amortization transmission=IF THEN ELSE ( Debt transmission > 0 , credit transmission\
+		/amortization period , 0 )
+	~	CHF/Year
+	~		|
+
+PV of outstanding distribution investments per area[area]=IF THEN ELSE(planned year of construction start distribution\
+		[area] + amortization period > Time, IF THEN ELSE ( planned year of construction start distribution\
+		[area] > Time , (EXP(-(planned year of construction start distribution[area]-Time)*\
+		discount rate)-EXP(-(planned year of construction start distribution[area]+amortization period\
+		-Time)*discount rate))/(discount rate*amortization period) , ZIDZ(1-EXP(-(planned year of construction start distribution\
+		[area]+amortization period-Time)*discount rate), discount rate*amortization period)\
+		 ) * credit for distribution construction[area], 0)
+	~	
+	~		|
+
+construction speed storage=IF THEN ELSE(year of construction start storage<=Time :AND:\
+		 Remaining construction time storage > 0, 1, 0)
+	~	
+	~		|
+
+Debt generation= INTEG (new debt generation-debt amortization generation,
+		0)
+	~	CHF
+	~		|
+
+new debt generation=generation spending
+	~	CHF/Year
+	~		|
+
+new debt storage=storage spending
+	~	CHF/Year
+	~		|
+
+PV of outstanding storage investments=IF THEN ELSE(year of construction start storage\
+		 + amortization period > Time, IF THEN ELSE ( year of construction start storage > \
+		Time , (EXP(-(year of construction start storage-Time)*discount rate)-EXP(-(year of construction start storage\
+		+amortization period-Time)*discount rate))/(discount rate*amortization period) , ZIDZ\
+		(1-EXP(-(year of construction start storage+amortization period-Time)*discount rate\
+		), discount rate*amortization period) ) * credit storage, 0)
+	~	
+	~		|
+
+year of storage commissioning=year of construction start storage+construction length storage
+	~	
+	~		|
+
+initial energy procurement price=0.1
+	~	
+	~		|
+
+PV of outstanding transmission investments=IF THEN ELSE(year of construction start transmission\
+		 + amortization period > Time, IF THEN ELSE ( year of construction start transmission\
+		 > Time , (EXP(-(year of construction start transmission-Time)*discount rate)-EXP(-\
+		(year of construction start transmission+amortization period-Time)*discount rate))/\
+		(discount rate*amortization period) , ZIDZ(1-EXP(-(year of construction start transmission\
+		+amortization period-Time)*discount rate), discount rate*amortization period) ) * credit transmission\
+		, 0)
+	~	
+	~	IF THEN ELSE(year of construction start transmission > Time,Remaining credit \
+		transmission*(1
+		/(1+discount rate
+		)^(year of construction start transmission-Time)),Remaining credit \
+		transmission*(1/(1+discount rate)^(Remaining construction time transmission
+		/2)))
+	|
+
+annual cash flow=annual revenues-annual costs
+	~	CHF/Year
+	~		|
+
+initial reserve or deficit=2e+07
+	~	
+	~		|
+
+forecasted energy sales per area[area]=(forecasted energy sales during densification
+	[area]+forecasted energy sales during construction[area]+forecasted energy sales after completion\
+		[area]+forecasted energy sales in old grids
+	[area])
+	~	
+	~	+1000000000 as a trick to avoid steep price increase at the end
+		
+		old: (SUM(initial capacity per area[area!])+SUM(initial planned capacity for \
+		connection[area!])*adjustment factor for new areas
+		)*(time horizon-Time)
+	|
+
+effective specific investment cost service pipes[area]=specific investment cost service pipes\
+		[area]*(1-fraction of service investment costs charged to customer)
+	~	CHF/kWh
+	~		|
+
+specific GHG emissions of heating systems[oil]=0.265 ~~|
+specific GHG emissions of heating systems[gas]=0.202 ~~|
+specific GHG emissions of heating systems[DHC]=IF THEN ELSE(storage commissioned = 0,\
+		 0.0972, 0.0972-effect of storage on specific GHG of DH) ~~|
+specific GHG emissions of heating systems[HP]=0.007/3
+	~	
+	~		|
+
+Remaining credit service[area]= INTEG (-service spending[area],
+		credit service[area])
+	~	CHF
+	~		|
+
+investment spending=SUM(distribution spending[area!])+generation spending+SUM(service spending\
+		[area!])+storage spending+transmission spending
+	~	
+	~		|
+
+service spending[area]=IF THEN ELSE(Remaining credit service[area] > 0, (DHC connection rate\
+		[area,gas]+DHC connection rate[area,oil]+DHC connection rate[area,HP])*service spending per connected building
+	[area], 0)
+	~	
+	~		|
+
+"PV of outstanding system-level investments"=PV of outstanding generation investments\
+		+PV of outstanding storage investments+PV of outstanding transmission investments
+	~	
+	~		|
+
+average forecasted annual energy sales per area[area]=forecasted energy sales per area\
+		[area]/(time horizon-Time)
+	~	
+	~		|
+
+fraction of initial credit spent[area]=IF THEN ELSE(credit service[area] = 0, 0, service spending\
+		[area]/credit service[area])
+	~	
+	~		|
+
+service spending per connected building[area]=average heating requirements per year[area\
+		]*effective specific investment cost service pipes[area]
+	~	
+	~		|
+
+energy procurement price=IF THEN ELSE ( storage commissioned = 0, initial energy procurement price\
+		, initial energy procurement price - storage effect on energy procurement price )
+	~	
+	~		|
+
+specific investment cost service pipes[area]=1.5
+	~	
+	~		|
+
+effect of storage on specific GHG of DH=0.05
+	~	
+	~		|
+
+fraction of service investment costs charged to customer=1
+	~	
+	~		|
+
+credit service[area]=initial planned capacity for connection[area]*effective specific investment cost service pipes\
+		[area]
+	~	CHF
+	~		|
+
+subsidies for heating systems[oil]=0 ~~|
+subsidies for heating systems[gas]=0 ~~|
+subsidies for heating systems[DHC]=0 ~~|
+subsidies for heating systems[HP]=0*factor for HP subsidies
+	~	
+	~		|
+
+SWITCH moving time horizon window=0
+	~	
+	~		|
+
+time horizon=IF THEN ELSE(SWITCH moving time horizon window = 1, Time+moving time horizon window\
+		, fixed time horizon)
+	~	
+	~		|
+
+factor for HP subsidies=0
+	~	
+	~		|
+
+credit for distribution construction[area]=initial planned capacity for connection[area\
+		]*specific investment cost for distribution grid
+	~	
+	~	3.3696e+07
+	|
+
+PV of outstanding distribution investments=SUM(PV of outstanding distribution investments per area\
+		[area!])
+	~	
+	~		|
+
+SWITCH fossil fuel ban=1
+	~	
+	~		|
+
+x2[area]=IF THEN ELSE(planned year of densification start[area] <= time horizon, MAX(\
+		planned year of densification start[area],Time), time horizon)
+	~	
+	~		|
+
+overall GHG emissions from heating=SUM(energy delivered by heating system[heating system\
+		!]*specific GHG emissions of heating systems[heating system!])
+	~	
+	~		|
+
+distribution spending[area]=IF THEN ELSE(construction time for distribution construction\
+		[area] <= 0, 0, IF THEN ELSE(Remaining credit distribution[area] <= 0, 0, MIN(credit for distribution construction\
+		[area]/construction time for distribution construction
+	[area]*construction speed distribution[area],Remaining credit distribution[area])))
+	~	
+	~		|
+
+gross investment costs of heating systems[oil]=66000 ~~|
+gross investment costs of heating systems[gas]=48500 ~~|
+gross investment costs of heating systems[DHC]=62000 ~~|
+gross investment costs of heating systems[HP]=120000
+	~	
+	~		|
+
+Remaining credit distribution[area]= INTEG (-distribution spending[area],
+		credit for distribution construction[area])
+	~	
+	~		|
+
+y3[area]=IF THEN ELSE(planned year of densification start[area] <= time horizon, IF THEN ELSE\
+		 ( Remaining construction time distribution[area] > 0 , expected share of connected demand during construction
+	[area] , current share of target demand[area] ), expected share of connected demand during construction\
+		[area] * (time horizon-planned year of construction start distribution[area])/construction time for distribution construction\
+		[area])
+	~	
+	~		|
+
+integral result after completion[area]=IF THEN ELSE(b2[area] < time horizon, (EXP(-b2\
+		[area]*discount rate)-EXP ( -b3*discount rate ))/discount rate, 0 )
+	~	
+	~	OLD (and possibly wrong): IF THEN ELSE ( b2[area] < time horizon, \
+		(EXP(-b2[area]*discount rate)*((b2[area]*
+		discount rate)+1) - EXP(-b3*discount rate)*((b3*discount \
+		rate)+1))/((discount rate)^2) , 0 )
+	|
+
+fossil fuel ban year=2020
+	~	
+	~		|
+
+fossil fuels banned=IF THEN ELSE ( SWITCH fossil fuel ban = 1 :AND: fossil fuel ban year\
+		 <= Time , 1 , 0 )
+	~	
+	~		|
+
+investment costs of heating systems[heating system]=gross investment costs of heating systems\
+		[heating system]-subsidies for heating systems[heating system]
+	~	
+	~		|
+
+overall energy delivered=SUM(energy delivered[area!])
+	~	
+	~		|
+
+b3=MAX(time horizon-Time,0)
+	~	
+	~		|
+
+moving time horizon window=20
+	~	
+	~		|
+
+x1[area]=IF THEN ELSE(planned year of construction start distribution[area] <= time horizon\
+		, MAX(planned year of construction start distribution[area], Time), time horizon)
+	~	
+	~		|
+
+"PV of new O&M costs"=SUM("PV of new O&M costs per area"[area!])
+	~	
+	~		|
+
+specific investment cost for distribution grid=1.2
+	~	CHF/kWh
+	~		|
+
+overall market share of heating systems[heating system]=energy delivered by heating system\
+		[heating system]/overall heating demand*100
+	~	
+	~		|
+
+"PV of new O&M costs per area"[area]=(Remaining credit distribution[area]*"O&M fraction"\
+		*integral result for construction
+	[area]) + (Remaining credit service[area]*"O&M fraction"*integral result for densification\
+		[area])
+	~	
+	~	OLD (and possibly wrong): (Remaining credit service[area]+Remaining credit \
+		distribution[area])*"O&M fraction"*(time horizon-Time)*(1-(1+discount rate
+		)^(Time-time horizon))/discount rate
+	|
+
+a1[area]=MAX(x1[area]-Time,0)
+	~	
+	~		|
+
+a2[area]=MAX(x2[area]-Time,0)
+	~	
+	~		|
+
+integral result for densification[area]=(EXP (-discount rate*(a2[area]+b2[area]))*(EXP\
+		(a2[area]*discount rate)*(m[area]*(a2[area]*discount rate - b2[area]*discount rate \
+		- 1)-y3[area]*discount rate)+EXP(b2[area]*discount rate)*(m[area]+y3[area]*discount rate\
+		)) )/(discount rate)^2
+	~	
+	~		|
+
+integral result in old grids[area]=((-EXP(-x2o[area]*discount rate)*(x2o[area]*mo[area\
+		]*discount rate+mo[area]+y1o[area]*discount rate)+mo[area]+y1o[area]*discount rate
+	)/((discount rate)^2))+IF THEN ELSE ( x2o[area] < time horizon-Time , (EXP(-x2o[area\
+		]*discount rate) - (EXP(-x4o*discount rate)))/discount rate , 0 )
+	~	
+	~	+IF THEN ELSE ( x2o[area] < time horizon-Time , (EXP(-x2o[area]*discount \
+		rate)*((x2o[area]*discount rate)+1) - (EXP(-x4o*discount \
+		rate)*((x4o*discount rate)+1)))/((discount rate)^2) , 0 )
+	|
+
+y1[area]=MIN(current share of target demand[area],expected share of connected demand during construction\
+		[area])
+	~	
+	~		|
+
+PV of forecasted energy costs=SUM(PV of forecasted energy costs after completion[area\
+		!]) + SUM(PV of forecasted energy costs during construction[area!]) + SUM(PV of forecasted energy costs during densification\
+		[area!]) + SUM(PV of forecasted energy costs in old grids[area!])
+	~	
+	~		|
+
+m[area]=ZIDZ(actual pace of densification[area],initial planned capacity for connection\
+		[area])
+	~	
+	~		|
+
+b1[area]=MAX(x2[area]-Time,0)
+	~	
+	~		|
+
+b2[area]=MAX(x4[area]-Time,0)
+	~	
+	~		|
+
+integral result for construction[area]=(EXP (-discount rate*(a1[area]+b1[area]))*(EXP\
+		(a1[area]*discount rate)*(mc[area]*(a1[area]*discount rate - b1[area]*discount rate\
+		 - 1)-y1[area]*discount rate)+EXP(b1[area]*discount rate)*(mc[area]+y1[area]*discount rate\
+		)) )/(discount rate)^2
+	~	
+	~		|
+
+x4o=time horizon-Time
+	~	
+	~		|
+
+mc[area]=ZIDZ(expected share of connected demand during construction[area],construction time for distribution construction\
+		[area])
+	~	
+	~		|
+
+y5[area]=IF THEN ELSE ( estimated year of densification completion[area] > time horizon\
+		 , estimated share at time horizon[area] , 1 )
+	~	
+	~		|
+
+x4[area]=MIN(estimated year of densification completion[area],time horizon)
+	~	
+	~		|
+
+x2o[area]=MIN(time horizon,estimated year where maximum demand will be reached[area])\
+		-Time
+	~	
+	~		|
+
+total forecasted energy sales=SUM(forecasted energy sales per area[area!])
+	~	kWh
+	~		|
+
+minimum share of target at time horizon=0.3
+	~	
+	~		|
+
+Connected demand at densification start[area]= INTEG (connection rate during distribution construction\
+		[area],
+		0)
+	~	
+	~		|
+
+connection rate during densification[area]=IF THEN ELSE ( Time >= planned year of densification start\
+		[area] , total connection rate
+	[area], 0 )
+	~	
+	~		|
+
+estimated share at time horizon[area]=MIN(1,IF THEN ELSE(Time > planned year of densification start\
+		[area],IF THEN ELSE (
+	 actual pace of densification[area]*(time horizon-Time) >= remaining demand to connect
+	[area], 1 , current share of target demand[area] + ZIDZ(actual pace of densification\
+		[area]*(time horizon-Time),initial planned capacity for connection[area])),
+	expected share of connected demand during construction[area]+(1-expected share of connected demand during construction\
+		[
+	area])/construction time service[area]*(time horizon-(MAX ( planned year of construction start distribution\
+		[area]-Time ,
+	 0 ) + Remaining construction time distribution[area]))))
+	~	
+	~		|
+
+actual pace of densification[area]=IF THEN ELSE ( Time < planned year of densification start\
+		[area] , 0 , ZIDZ(Connected demand during densification
+	[area], time since densification start[area]))
+	~	
+	~		|
+
+connection rate during distribution construction[area]=IF THEN ELSE ( Time < planned year of densification start\
+		[area] , total connection rate[area], 0 )
+	~	
+	~		|
+
+estimated year of densification completion[area]=IF THEN ELSE(planned year of densification start\
+		[area] < INITIAL TIME, Time, IF THEN ELSE( Time < planned year of densification start\
+		[area] , planned year of completion
+	[area] , Time + ZIDZ(remaining demand to connect[area],actual pace of densification[\
+		area])))
+	~	
+	~		|
+
+Connected demand during densification[area]= INTEG (connection rate during densification\
+		[area],
+		0)
+	~	
+	~		|
+
+time since densification start[area]=Time-planned year of densification start[area]
+	~	
+	~		|
+
+planned year of densification start[area]=planned year of construction start distribution\
+		[area]+construction time for distribution construction[area]
+	~	
+	~		|
+
+planned year of completion[area]=planned year of construction start distribution[area\
+		]+construction time for distribution construction[area]+construction time service[area\
+		]
+	~	
+	~		|
+
+expected share of connected demand during construction[area]=0.5
+	~	
+	~		|
+
+DHC contract duration=20
+	~	
+	~		|
+
+ageing rate=1
+	~	
+	~		|
+
+"PV of O&M costs of existing infrastructure"=((Replacement value of infrastructure*"O&M fraction"\
+		)-((Replacement value of infrastructure*"O&M fraction")*EXP ( -(time horizon-Time)*\
+		discount rate ) ))/discount rate
+	~	
+	~	OLD (and possibly wrong): Replacement value of infrastructure*"O&M \
+		fraction"*(time horizon-Time)*(1-(1+discount rate)^(Time-time \
+		horizon))/discount rate
+	|
+
+initial average age of DHC connections[area0]=10 ~~|
+initial average age of DHC connections[area1]=0 ~~|
+initial average age of DHC connections[area2]=0 ~~|
+initial average age of DHC connections[area3]=0 ~~|
+initial average age of DHC connections[area4]=0 ~~|
+initial average age of DHC connections[area5]=0
+	~	
+	~		|
+
+HP to DHC[area]=number of HPs replaced[area]*share of new heating system from HP[DHC,\
+		area]
+	~	
+	~	No outflow at the beginning of simulation period to account for the fact \
+		that most HPs are still new.
+	|
+
+increase in age of DHC connections[area]=Buildings connected to DHC[area]*ageing rate
+	~	
+	~		|
+
+increase in age of HPs[area]=Buildings with decentral HP[area]*ageing rate
+	~	
+	~		|
+
+number of DHC contracts renewed[area]=Buildings connected to DHC[area]/DHC contract duration\
+		*IF THEN ELSE(average age of DHC contracts[area] >= 10, 1, average age of DHC contracts\
+		[area]/10)
+	~	
+	~		|
+
+decrease in age of HPs[area]=number of HPs replaced[area]*average age of HP[area]
+	~	
+	~		|
+
+initial average age of HP[area]=3
+	~	
+	~		|
+
+Total age of HP[area]= INTEG (increase in age of HPs[area]-decrease in age of HPs[area\
+		],
+		initial total age of HPs[area])
+	~	
+	~		|
+
+available capacity increase rate[area]=energy efficiency gains of connected buildings\
+		[area]+freeing capacity from buildings disconnecting[area]
+	~	
+	~		|
+
+decrease in age of DHC connections[area]=number of DHC contracts renewed[area]*average age of DHC contracts\
+		[area]
+	~	
+	~		|
+
+average age of DHC contracts[area]=ZIDZ(Total age of DHC connections[area],Buildings connected to DHC\
+		[area])
+	~	
+	~		|
+
+average age of HP[area]=ZIDZ(Total age of HP[area],Buildings with decentral HP[area])
+	~	
+	~		|
+
+initial total age of HPs[area]=initial average age of HP[area]*initial number of HPs[\
+		area]
+	~	
+	~		|
+
+available capacity sales rate[area]=capacity taken by newly committed buildings[area]
+	~	
+	~		|
+
+average lifetime of HP=25
+	~	
+	~		|
+
+DHC to HP[area]=number of DHC contracts renewed[area]*share of new heating system from DHC\
+		[HP,area]
+	~	
+	~	No outflow in the initial phase (assuming long-term contracts)
+	|
+
+initial total age of DHC connections[area]=initial average age of DHC connections[area\
+		]*initial connected buildings[area]
+	~	
+	~		|
+
+Total age of DHC connections[area]= INTEG (increase in age of DHC connections[area]-decrease in age of DHC connections\
+		[area],
+		initial total age of DHC connections[area])
+	~	
+	~		|
+
+Buildings with decentral HP[area]= INTEG (DHC to HP[area]+gas to HP[area]+oil to HP[area\
+		]-HP to DHC[area],
+		initial number of HPs[area])
+	~	
+	~		|
+
+initial number of HPs[area0]=50 ~~|
+initial number of HPs[area1]=10 ~~|
+initial number of HPs[area2]=10 ~~|
+initial number of HPs[area3]=10 ~~|
+initial number of HPs[area4]=10 ~~|
+initial number of HPs[area5]=10
+	~	
+	~		|
+
+capacity taken by newly committed buildings[area]=DH committal rate[area]*average heating requirements per year\
+		[area]
+	~	
+	~		|
+
+number of HPs replaced[area]=Buildings with decentral HP[area]/average lifetime of HP\
+		*IF THEN ELSE(average age of HP[area] >= 10, 1, average age of HP[area]/10)
+	~	
+	~		|
+
+freeing capacity from buildings disconnecting[area]=DHC to HP[area]*average heating requirements per year\
+		[area]
+	~	
+	~		|
+
+generation spending=
+	IF THEN ELSE(construction length generation = 0, 0, credit generation/construction length generation\
+		*construction speed generation)
+	~	
+	~		|
+
+annualized costs of heating systems[heating system,area]=operating costs of heating systems\
+		[heating system,area]+investment costs of heating systems[heating system]*(discount factor for heating system investment\
+		*(1+discount factor for heating system investment)^20)/(((1+discount factor for heating system investment\
+		)^20)-1)
+	~	CHF
+	~		|
+
+initial committed anchor loads per area[area0]=0 ~~|
+initial committed anchor loads per area[area1]=1.176e+07 ~~|
+initial committed anchor loads per area[area2]=1.176e+07 ~~|
+initial committed anchor loads per area[area3]=1.176e+07 ~~|
+initial committed anchor loads per area[area4]=1.176e+07 ~~|
+initial committed anchor loads per area[area5]=1.176e+07
+	~	
+	~		|
+
+initial connected buildings[area0]=1000 ~~|
+initial connected buildings[area1]=0 ~~|
+initial connected buildings[area2]=0 ~~|
+initial connected buildings[area3]=0 ~~|
+initial connected buildings[area4]=0 ~~|
+initial connected buildings[area5]=0
+	~	
+	~	Old: 2000
+	|
+
+available capacity decrease[area]=
+	total connection rate[area]
+	~	
+	~		|
+
+Available capacity for sale[area]= INTEG (
+	available capacity increase rate[area]-available capacity sales rate[area],
+		initial planned capacity for connection[area])
+	~	
+	~		|
+
+"average degree-days"=
+	3125
+	~	
+	~		|
+
+Average heat loss coefficient of buildings[area]= INTEG (
+	-energy efficiency improvement rate[area],
+		initial heat loss coefficient of buildings[area])
+	~	
+	~		|
+
+Buildings committed to DHC[area,oil]= INTEG (oil to DHC[area]-DHC connection rate[area\
+		,oil],
+		0) ~~|
+Buildings committed to DHC[area,gas]= INTEG (gas to DHC[area]-DHC connection rate[area\
+		,gas],
+		0) ~~|
+Buildings committed to DHC[area,HP]= INTEG (HP to DHC[area]-DHC connection rate[area,\
+		HP],
+		0) ~~|
+Buildings committed to DHC[area,DHC]= INTEG (0,
+		0)
+	~	
+	~		|
+
+Buildings connected to DHC[area]= INTEG (
+	DHC connection rate[area,oil]+DHC connection rate[area,gas]+DHC connection rate[area\
+		,HP]-DHC to HP[area],
+		initial connected buildings[area])
+	~	
+	~		|
+
+Effective age of DH grid[area]= INTEG (
+	effective age update[area],
+		planned year of construction start distribution[area]-INITIAL TIME)
+	~	
+	~		|
+
+effective age update[area]=
+	IF THEN ELSE(Time < planned year of construction start distribution[area], 1 , IF THEN ELSE\
+		(Remaining construction time distribution[area] > 0, construction speed distribution\
+		[area] , IF THEN ELSE(Remaining construction time service[area] > 0, construction progress service\
+		[area], 1 ) ) )
+	~	
+	~		|
+
+Committed anchor loads[area]= INTEG (
+	-anchor load connection rate[area],
+		initial committed anchor loads per area[area])
+	~	
+	~		|
+
+Connected anchor loads[area]= INTEG (
+	anchor load connection rate[area],
+		initial connected anchor loads per area[area])
+	~	
+	~		|
+
+construction length generation=2
+	~	Year
+	~		|
+
+construction length storage=3
+	~	
+	~		|
+
+construction length transmission=
+	2
+	~	
+	~		|
+
+construction progress distribution[area]=
+	IF THEN ELSE(Remaining construction time distribution[area] = 0, 0, construction speed distribution\
+		[area])
+	~	
+	~		|
+
+construction progress generation=
+	IF THEN ELSE(Remaining construction time generation> 0, construction speed generation\
+		, 0)
+	~	
+	~		|
+
+construction progress service[area]=
+	fraction of initial credit spent[area]*Remaining construction time service[area]
+	~	
+	~		|
+
+construction progress storage=
+	IF THEN ELSE(Remaining construction time storage > 0, construction speed storage, 0)
+	~	
+	~		|
+
+construction progress transmission=
+	IF THEN ELSE(Remaining construction time transmission > 0, construction speed transmission\
+		, 0)
+	~	
+	~		|
+
+construction speed distribution[area]=
+	IF THEN ELSE(planned year of construction start distribution[area
+	] <=Time, 1*delay(Time)*slow progress(Time), 0 )
+	~	
+	~		|
+
+construction speed transmission=
+	IF THEN ELSE(year of construction start transmission<=Time, 1, 0)
+	~	
+	~		|
+
+Remaining construction time service[area]= INTEG (
+	-construction progress service[area],
+		construction time service[area])
+	~	
+	~		|
+
+construction time service[area0]=
+	0 ~~|
+construction time service[area1]=
+	12 ~~|
+construction time service[area2]=
+	12 ~~|
+construction time service[area3]=
+	12 ~~|
+construction time service[area4]=
+	12 ~~|
+construction time service[area5]=
+	12
+	~	
+	~		|
+
+convenience utility of heating systems[oil]=0.5 ~~|
+convenience utility of heating systems[gas]=0.9 ~~|
+convenience utility of heating systems[DHC]=1 ~~|
+convenience utility of heating systems[HP]=0.5
+	~	
+	~		|
+
+convenience utility term[heating system]=
+	convenience utility of heating systems[heating system]*weight of convenience utility
+	~	
+	~		|
+
+Remaining credit generation= INTEG (
+	-generation spending,
+		credit generation)
+	~	
+	~		|
+
+credit generation=3e+07
+	~	
+	~		|
+
+credit transmission=
+	0
+	~	
+	~		|
+
+delay(
+	[(0,0)-(10,10)],(2010,1),(2011,1),(2012,1),(2013,1),(2014,1),(2015,1),(2016,1),(2017\
+		,1),(2018,1),(2019,1),(2020,1),(2021,1),(2050,1))
+	~	
+	~		|
+
+DHC connection rate[area,oil]=
+	IF THEN ELSE(Buildings committed to DHC[area,oil]  <= Available capacity for connection\
+		[area]/average heating requirements per year[area], Buildings committed to DHC
+	[area,oil] , Available capacity for connection[area]/average heating requirements per year\
+		[area]) ~~|
+DHC connection rate[area,gas]=
+	IF THEN ELSE(Buildings committed to DHC[area,gas]  <= Available capacity for connection\
+		[area]/average heating requirements per year[area], Buildings committed to DHC
+	[area,gas] , Available capacity for connection[area]/average heating requirements per year\
+		[area]) ~~|
+DHC connection rate[area,HP]=
+	IF THEN ELSE(Buildings committed to DHC[area,HP]  <= Available capacity for connection\
+		[area]/average heating requirements per year[area], Buildings committed to DHC
+	[area,HP] , Available capacity for connection[area]/average heating requirements per year\
+		[area])
+	~	
+	~	IF THEN ELSE(Buildings committed to DHC[area,gas]  <= Available capacity for \
+		connection[area], Buildings committed to DHC
+		[area,gas] , Available capacity for connection[area])
+	|
+
+slow progress(
+	[(0,0)-(10,10)],(2010,1),(2050,1))
+	~	
+	~		|
+
+discount factor for heating system investment=
+	0.05
+	~	
+	~		|
+
+discount rate=0.04
+	~	
+	~		|
+
+distribution construction decision update[area]=
+	0
+	~	
+	~		|
+
+time utility penalty[oil,area]=
+	1 ~~|
+time utility penalty[gas,area]=
+	1 ~~|
+time utility penalty[DHC,area]=
+	IF THEN ELSE(planned year of construction start distribution[area] <= Time, 1, MAX(1\
+		 - (planned year of construction start distribution[area]-Time) * 0.2, 0)) ~~|
+time utility penalty[HP,area]=
+	1
+	~	
+	~		|
+
+electricity price=0.2532
+	~	
+	~	0.2532
+	|
+
+transmission spending=
+	IF THEN ELSE(construction length transmission = 0, 0, credit transmission/construction length transmission\
+		*construction speed transmission)
+	~	
+	~		|
+
+energy efficiency gains of connected buildings[area]=
+	Buildings connected to DHC[area]*energy efficiency improvement rate[area]*"average degree-days"\
+		*24/1000
+	~	
+	~		|
+
+energy efficiency improvement rate[area]=IF THEN ELSE(Average heat loss coefficient of buildings\
+		[area] > minimum attainable heat loss coefficient, rate of heat loss coefficient improvement\
+		[area], 0)
+	~	
+	~		|
+
+financial utility of heating systems[heating system,area]=
+	MAX(1-(annualized costs of heating systems[heating system,area]-VMIN(annualized costs of heating systems\
+		[heating system!,area]))/VMIN(annualized costs of heating systems[heating system!,area\
+		]),0)
+	~	
+	~		|
+
+financial utility term[heating system,area]=
+	financial utility of heating systems[heating system,area]*weight of financial utility
+	~	
+	~		|
+
+gas price=
+	0.1484
+	~	
+	~		|
+
+minimum attainable heat loss coefficient=200
+	~	
+	~		|
+
+Remaining construction time generation= INTEG (
+	-construction progress generation,
+		construction length generation)
+	~	
+	~		|
+
+heat pump COP=2.5
+	~	
+	~		|
+
+Remaining construction time storage= INTEG (
+	-construction progress storage,
+		construction length storage)
+	~	
+	~		|
+
+Remaining construction time transmission= INTEG (
+	-construction progress transmission,
+		construction length transmission)
+	~	
+	~		|
+
+initial capacity per area[area0]=1.02e+08 ~~|
+initial capacity per area[area1]=0 ~~|
+initial capacity per area[area2]=0 ~~|
+initial capacity per area[area3]=0 ~~|
+initial capacity per area[area4]=0 ~~|
+initial capacity per area[area5]=0
+	~	
+	~		|
+
+Remaining credit storage= INTEG (
+	-storage spending,
+		credit storage)
+	~	
+	~		|
+
+initial connected anchor loads per area[area0]=4.669e+07 ~~|
+initial connected anchor loads per area[area1]=0 ~~|
+initial connected anchor loads per area[area2]=0 ~~|
+initial connected anchor loads per area[area3]=0 ~~|
+initial connected anchor loads per area[area4]=0 ~~|
+initial connected anchor loads per area[area5]=0
+	~	
+	~		|
+
+initial DHC price=0.14
+	~	
+	~		|
+
+initial heat loss coefficient of buildings[area0]=800 ~~|
+initial heat loss coefficient of buildings[area1]=800 ~~|
+initial heat loss coefficient of buildings[area2]=800 ~~|
+initial heat loss coefficient of buildings[area3]=800 ~~|
+initial heat loss coefficient of buildings[area4]=800 ~~|
+initial heat loss coefficient of buildings[area5]=800
+	~	
+	~		|
+
+initial planned capacity for connection[area0]=0 ~~|
+initial planned capacity for connection[area1]=2.3758e+07 ~~|
+initial planned capacity for connection[area2]=2.3758e+07 ~~|
+initial planned capacity for connection[area3]=2.3758e+07 ~~|
+initial planned capacity for connection[area4]=2.3758e+07 ~~|
+initial planned capacity for connection[area5]=2.3758e+07
+	~	
+	~		|
+
+initial replacement value=
+	2e+08
+	~	
+	~		|
+
+levelized costs=forecasted discounted costs/SUM(forecasted energy sales per area[area\
+		!])
+	~	
+	~		|
+
+market value utility of heating systems[heating system]=
+	1-specific GHG emissions of heating systems[heating system]/VMAX(specific GHG emissions of heating systems\
+		[heating system!])
+	~	
+	~		|
+
+market value utility term[heating system]=
+	market value utility of heating systems[heating system]*weight of market utility
+	~	
+	~		|
+
+oil price=
+	0.1144
+	~	
+	~		|
+
+storage spending=
+	IF THEN ELSE(construction length storage = 0, 0, credit storage/construction length storage\
+		*construction speed storage)
+	~	
+	~		|
+
+operating costs of heating systems[heating system,area]=
+	energy prices for heating systems[heating system]*average heating requirements per year\
+		[area]+service costs of heating systems[heating system]
+	~	
+	~		|
+
+Remaining credit transmission= INTEG (
+	-transmission spending,
+		credit transmission)
+	~	
+	~		|
+
+procurement costs=
+	energy procurement price*SUM(energy delivered[area!])
+	~	
+	~		|
+
+upfront cost utility of heating systems[heating system]= WITH LOOKUP (
+	investment costs of heating systems[heating system],
+		  ([(0,0)-(1.08e+06,1)],(540,1),(5400,0.83),(54000,0.383),(540000,0.03),(1.08e+06,0\
+		) ))
+	~	
+	~		|
+
+upfront cost utility term[heating system]=
+	upfront cost utility of heating systems[heating system]*weight of upfront utility
+	~	
+	~		|
+
+Replacement value of infrastructure= INTEG (
+	replacement value increase,
+		initial replacement value)
+	~	
+	~		|
+
+service costs of heating systems[oil]=
+	550 ~~|
+service costs of heating systems[gas]=
+	650 ~~|
+service costs of heating systems[DHC]=
+	170 ~~|
+service costs of heating systems[HP]=
+	300
+	~	
+	~		|
+
+year of construction start storage=2030
+	~	
+	~		|
+
+year of construction start generation=2022
+	~	
+	~		|
+
+year of construction start transmission=
+	0
+	~	
+	~		|
+
+AT DHC price change=5
+	~	Year
+	~		|
+
+"Long-term price component"= INTEG (
+	"long-term price change rate",
+		initial DHC price)
+	~	CHF/kWh
+	~		|
+
+area:
+	area0,area1,area2,area3,area4,area5
+	~	
+	~		|
+
+DH committal rate[area]=
+	gas to DHC[area]+HP to DHC[area]+oil to DHC[area]
+	~	
+	~		|
+
+"O&M fraction"=0.03
+	~	
+	~		|
+
+beta=4
+	~	Dmnl
+	~		|
+
+oil to gas[area]=ZIDZ(Buildings with oil heating[area]*share of new heating system from oil\
+		[gas,area],AT oil[area])
+	~	
+	~		|
+
+Remaining construction time distribution[area]= INTEG (
+	-construction progress distribution[area],
+		construction time for distribution construction[area])
+	~	
+	~		|
+
+replacement value increase=
+	SUM(distribution spending[area!])+generation spending+SUM(service spending[area!])+storage spending\
+		+transmission spending
+	~	
+	~		|
+
+construction time for distribution construction[area0]=
+	0 ~~|
+construction time for distribution construction[area1]=
+	3 ~~|
+construction time for distribution construction[area2]=
+	3 ~~|
+construction time for distribution construction[area3]=
+	3 ~~|
+construction time for distribution construction[area4]=
+	3 ~~|
+construction time for distribution construction[area5]=
+	3
+	~	
+	~		|
+
+operation and maintenance costs=
+	Replacement value of infrastructure*"O&M fraction"
+	~	
+	~		|
+
+gas to HP[area]=ZIDZ(Buildings with gas heating[area]*share of new heating system from gas\
+		[HP,area],AT gas[area])
+	~	
+	~		|
+
+oil to DHC[area]=ZIDZ(Buildings with oil heating[area]*share of new heating system from oil\
+		[DHC,area],AT oil[area])
+	~	
+	~		|
+
+oil to HP[area]=ZIDZ(Buildings with oil heating[area]*share of new heating system from oil\
+		[HP,area],AT oil[area])
+	~	
+	~		|
+
+heating system:
+	oil,gas,DHC,HP
+	~	
+	~		|
+
+gas to DHC[area]=ZIDZ(Buildings with gas heating[area]*share of new heating system from gas\
+		[DHC,area],AT gas[area])
+	~	
+	~		|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Parameters
+	|
+
+FINAL TIME  = 2072
+	~	Year
+	~	The final time for the simulation.
+	|
+
+INITIAL TIME  = 2018
+	~	Year
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 
+        TIME STEP
+	~	Year [0,?]
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 0.125
+	~	Year [0,?]
+	~	The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Customer decision-making
+$-1--1--1,0,|12||-1--1--1|-1--1--1|-1--1--1|-1--1--1|-1--1--1|96,96,46,0
+10,1,Available capacity for sale,-605,868,82,29,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+12,2,48,-867,866,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,3,5,2,100,0,0,22,0,192,0,-1--1--1,,1|(-816,866)|
+1,4,5,1,4,0,0,22,0,192,0,-1--1--1,,1|(-725,866)|
+11,5,0,-768,866,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,6,available capacity increase rate,-768,903,81,29,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+12,7,48,-219,868,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,8,10,1,100,0,0,22,0,192,0,-1--1--1,,1|(-455,868)|
+1,9,10,7,4,0,0,22,0,192,0,-1--1--1,,1|(-302,868)|
+11,10,0,-381,868,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,11,available capacity sales rate,-381,905,81,29,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,12,energy efficiency gains of connected buildings,-696,739,86,42,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,13,12,6,1,0,0,0,0,192,0,-1--1--1,,1|(-726,800)|
+10,14,DH committal rate,-409,1075,64,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,15,Buildings with oil heating,286,903,65,29,3,3,0,4,-1,1,0,0,0-0-0,128-128-128,|||0-0-0,0,0,0,0,0,0
+10,16,Buildings with gas heating,342,1084,65,29,3,3,0,4,-1,1,0,0,0-0-0,255-128-0,|||0-0-0,0,0,0,0,0,0
+10,17,Buildings with decentral HP,689,1222,65,29,3,3,0,4,-1,1,0,0,0-0-0,128-255-128,|||0-0-0,0,0,0,0,0,0
+10,18,Buildings committed to DHC,560,766,85,29,3,3,0,4,-1,1,0,0,0-0-0,128-255-255,|||0-0-0,0,0,0,0,0,0
+10,19,Buildings connected to DHC,990,698,83,29,3,3,0,4,-1,1,0,0,0-0-0,0-128-255,|||0-0-0,0,0,0,0,0,0
+1,20,22,15,100,0,0,22,0,192,0,-1--1--1,,1|(289,961)|
+1,21,22,16,4,0,0,22,0,192,0,-1--1--1,,1|(289,1029)|
+11,22,0,289,997,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,23,oil to gas,339,997,42,22,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,24,26,16,100,0,0,22,0,192,0,-1--1--1,,1|(301,1162)|
+1,25,26,17,4,0,0,22,0,192,0,-1--1--1,,1|(466,1217)|
+11,26,0,301,1217,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,27,gas to HP,352,1217,43,22,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,28,30,15,100,0,0,22,0,192,0,-1--1--1,,1|(291,812)|
+1,29,30,18,4,0,0,22,0,192,0,-1--1--1,,1|(387,745)|
+11,30,0,291,745,8,6,33,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,31,oil to DHC,291,773,46,22,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,32,34,16,100,0,0,22,0,192,0,-1--1--1,,1|(464,1086)|
+1,33,34,18,4,0,0,22,0,192,0,-1--1--1,,1|(529,937)|
+11,34,0,529,1086,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,35,gas to DHC,588,1086,51,22,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,36,38,17,100,0,0,22,0,192,0,-1--1--1,,1|(743,1091)|
+1,37,38,18,4,0,0,22,0,192,0,-1--1--1,,1|(743,766)|
+11,38,0,743,984,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,39,HP to DHC,799,984,48,22,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,40,42,18,100,0,0,22,0,192,0,-1--1--1,,1|(605,719)|
+1,41,42,19,4,0,0,22,0,192,0,-1--1--1,,1|(759,693)|
+11,42,0,605,693,6,8,34,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,43,DHC connection rate,685,693,74,29,40,3,0,0,-1,1,0,0,0,0,256,0,0,0
+10,44,Average heat loss coefficient of buildings,-332,1348,85,29,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+12,45,48,96,1349,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,46,48,44,100,0,0,22,0,192,0,-1--1--1,,1|(-165,1349)|
+1,47,48,45,4,0,0,22,0,192,0,-1--1--1,,1|(7,1349)|
+11,48,0,-77,1349,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,49,energy efficiency improvement rate,-77,1386,84,29,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,50,19,12,1,0,0,0,0,192,0,-1--1--1,,1|(123,547)|
+1,51,49,12,1,0,0,0,0,192,0,-1--1--1,,1|(-227,685)|
+10,52,perceived utility of heating systems,313,173,85,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,53,share of new heating system from oil,119,261,70,42,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,54,share of new heating system from gas,272,317,70,42,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,55,share of new heating system from HP,495,284,70,42,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,56,share of new heating system from DHC,749,382,70,42,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,57,beta,389,354,42,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,58,preference for existing system,359,414,71,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,59,57,54,0,0,0,0,1,192,0,255-128-0,|||0-0-0,1|(0,0)|
+1,60,57,53,1,0,0,0,1,192,0,128-128-128,|||0-0-0,1|(191,381)|
+1,61,57,55,1,0,0,0,1,192,0,128-255-128,|||0-0-0,1|(448,353)|
+1,62,57,56,1,0,0,0,1,192,0,0-128-255,|||0-0-0,1|(602,456)|
+1,63,58,54,1,0,0,0,1,192,0,255-128-0,|||0-0-0,1|(285,365)|
+1,64,58,53,1,0,0,0,1,192,0,128-128-128,|||0-0-0,1|(118,376)|
+1,65,58,55,1,0,0,0,1,192,0,128-255-128,|||0-0-0,1|(479,435)|
+1,66,58,56,1,0,0,0,1,192,0,0-128-255,|||0-0-0,1|(555,515)|
+1,67,52,53,1,0,0,0,1,192,0,128-128-128,|||0-0-0,1|(186,204)|
+1,68,52,54,1,0,0,0,1,192,0,255-128-0,|||0-0-0,1|(273,256)|
+1,69,52,55,1,0,0,0,1,192,0,128-255-128,|||0-0-0,1|(450,234)|
+1,70,52,56,1,0,0,0,1,192,0,0-128-255,|||0-0-0,1|(697,321)|
+1,71,53,31,1,0,0,0,1,192,0,128-128-128,|||0-0-0,1|(156,695)|
+1,72,74,15,100,0,0,22,0,192,0,-1--1--1,,1|(483,909)|
+1,73,74,17,4,0,0,22,0,192,0,-1--1--1,,1|(689,909)|
+11,74,0,623,909,8,6,33,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,75,oil to HP,623,937,42,22,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,76,53,23,1,0,0,0,1,192,0,128-128-128,|||0-0-0,1|(187,893)|
+1,77,53,75,1,0,0,0,1,192,0,128-128-128,|||0-0-0,1|(417,877)|
+1,78,54,27,1,0,0,0,1,192,0,255-128-0,|||0-0-0,1|(272,1157)|
+1,79,54,35,1,0,0,0,1,192,0,255-128-0,|||0-0-0,1|(496,999)|
+10,80,AT oil,446,1033,42,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,81,80,23,0,0,0,0,1,192,0,128-128-128,|||0-0-0,1|(0,0)|
+1,82,80,31,1,0,0,0,1,192,0,128-128-128,|||0-0-0,1|(427,963)|
+1,83,80,75,1,0,0,0,1,192,0,128-128-128,|||0-0-0,1|(524,1043)|
+10,84,AT gas,444,1145,42,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,85,84,27,1,0,0,0,1,192,0,255-128-0,|||0-0-0,1|(403,1186)|
+1,86,84,35,1,0,0,0,1,192,0,255-128-0,|||0-0-0,1|(552,1149)|
+1,87,89,19,100,0,0,22,0,192,0,-1--1--1,,1|(965,969)|
+1,88,89,17,4,0,0,22,0,192,0,-1--1--1,,1|(855,1217)|
+11,89,0,965,1217,8,6,33,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,90,DHC to HP,965,1245,48,22,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,91,15,31,1,0,0,0,1,192,0,128-128-128,|||0-0-0,1|(257,830)|
+1,92,15,23,1,0,0,0,1,192,0,128-128-128,|||0-0-0,1|(340,963)|
+1,93,15,75,1,0,0,0,1,192,0,128-128-128,|||0-0-0,1|(579,963)|
+1,94,16,27,1,0,0,0,1,192,0,255-128-0,|||0-0-0,1|(299,1162)|
+1,95,16,35,1,0,0,0,1,192,0,255-128-0,|||0-0-0,1|(511,1113)|
+1,96,55,39,1,0,0,0,1,192,0,128-255-128,|||0-0-0,1|(790,884)|
+1,97,56,90,1,0,0,0,1,192,0,0-128-255,|||0-0-0,1|(897,807)|
+10,98,oil to DHC,-543,1158,57,15,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,99,gas to DHC,-428,1195,62,15,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,100,HP to DHC,-323,1175,59,15,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,101,98,14,1,0,0,0,0,192,0,-1--1--1,,1|(-516,1105)|
+1,102,99,14,1,0,0,0,0,192,0,-1--1--1,,1|(-445,1113)|
+1,103,100,14,1,0,0,0,0,192,0,-1--1--1,,1|(-401,1114)|
+10,104,"average degree-days",-900,1269,57,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,105,average heating requirements per year,-766,1208,82,42,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,106,44,105,1,0,0,0,0,192,0,-1--1--1,,1|(-620,1401)|
+1,107,104,105,1,0,0,0,0,192,0,-1--1--1,,1|(-828,1219)|
+10,108,initial heat loss coefficient of buildings,-547,1505,69,42,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,109,108,44,1,0,0,0,0,192,1,-1--1--1,,1|(-454,1492)|
+1,110,44,49,1,0,0,0,0,192,0,-1--1--1,,1|(-165,1421)|
+10,111,minimum attainable heat loss coefficient,-45,1506,71,42,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,112,111,49,1,0,0,0,0,192,0,-1--1--1,,1|(-25,1454)|
+10,113,rate of heat loss coefficient improvement,-194,1566,74,42,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,114,113,49,1,0,0,0,0,192,0,-1--1--1,,1|(-101,1457)|
+1,115,104,12,1,0,0,0,0,192,0,-1--1--1,,1|(-765,762)|
+10,116,financial utility of heating systems,-264,265,79,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,117,weight of financial utility,-171,40,68,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,118,convenience utility of heating systems,532,-369,86,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,119,weight of convenience utility,600,-251,86,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,120,market value utility of heating systems,180,-271,75,42,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,121,weight of market utility,371,-241,62,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,122,financial utility term,-164,177,52,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,123,market value utility term,273,-116,61,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,124,convenience utility term,448,3,58,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,125,116,122,1,0,0,0,0,192,0,-1--1--1,,1|(-206,222)|
+1,126,117,122,1,0,0,0,0,192,0,-1--1--1,,1|(-175,105)|
+1,127,120,123,1,0,0,0,0,192,0,-1--1--1,,1|(191,-143)|
+1,128,121,123,1,0,0,0,0,192,0,-1--1--1,,1|(364,-151)|
+1,129,118,124,1,0,0,0,0,192,0,-1--1--1,,1|(454,-152)|
+1,130,119,124,1,0,0,0,0,192,0,-1--1--1,,1|(589,-113)|
+1,131,122,52,1,0,0,0,0,192,0,-1--1--1,,1|(52,131)|
+1,132,123,52,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,133,124,52,1,0,0,0,0,192,0,-1--1--1,,1|(351,92)|
+10,134,annualized costs of heating systems,-371,83,88,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,135,134,116,1,0,0,0,0,192,0,-1--1--1,,1|(-273,186)|
+10,136,discount factor for heating system investment,-412,232,84,42,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,137,136,134,1,0,0,0,0,192,0,-1--1--1,,1|(-402,144)|
+10,138,operating costs of heating systems,-565,426,81,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,139,138,134,1,0,0,0,0,192,0,-1--1--1,,1|(-498,213)|
+10,140,service costs of heating systems,-630,149,75,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,141,energy prices for heating systems,-855,379,77,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,142,141,138,1,0,0,0,0,192,0,-1--1--1,,1|(-654,384)|
+10,143,oil price,-1116,289,42,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,144,gas price,-956,288,42,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,145,electricity price,-896,167,45,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,146,143,141,1,0,0,0,0,192,0,-1--1--1,,1|(-944,327)|
+1,147,144,141,1,0,0,0,0,192,0,-1--1--1,,1|(-889,315)|
+1,148,145,141,1,0,0,0,0,192,0,-1--1--1,,1|(-871,268)|
+1,149,105,138,1,0,0,0,0,192,0,-1--1--1,,1|(-933,514)|
+10,150,investment costs of heating systems,-613,5,86,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,151,150,134,1,0,0,0,0,192,0,-1--1--1,,1|(-426,29)|
+10,152,upfront cost utility of heating systems,-130,-37,86,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,153,weight of upfront utility,56,-75,64,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,154,upfront cost utility term,32,67,56,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,155,152,154,1,0,0,0,0,192,0,-1--1--1,,1|(-10,19)|
+1,156,153,154,1,0,0,0,0,192,0,-1--1--1,,1|(87,-17)|
+1,157,154,52,1,0,0,0,0,192,0,-1--1--1,,1|(188,115)|
+1,158,150,152,1,0,0,0,0,192,0,-1--1--1,,1|(-319,-72)|
+10,159,subsidies for heating systems,-709,-160,75,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,160,159,150,1,0,0,0,0,192,0,-1--1--1,,1|(-630,-86)|
+10,161,heat pump COP,-748,220,52,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,162,161,141,1,0,0,0,0,192,0,-1--1--1,,1|(-832,304)|
+1,163,140,138,1,0,0,0,0,192,0,-1--1--1,,1|(-572,313)|
+10,164,specific GHG emissions of heating systems,78,-466,75,42,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,165,164,120,1,0,0,0,0,192,0,-1--1--1,,1|(66,-326)|
+10,166,Time,861,1154,29,10,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,167,Time,1060,1209,29,10,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,168,planned year of construction start distribution,1075,1311,81,42,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,169,planned year of construction start distribution,-386,436,81,42,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,170,time utility penalty,-233,351,64,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,171,169,170,1,0,0,0,0,192,0,-1--1--1,,1|(-281,415)|
+10,172,Time,-461,513,29,10,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,173,172,170,1,0,0,0,0,64,0,-1--1--1,,1|(-345,464)|
+10,174,availability utility penalty,-85,428,64,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,175,174,52,1,0,0,0,0,192,0,-1--1--1,,1|(64,234)|
+1,176,170,52,1,0,0,0,0,192,0,-1--1--1,,1|(66,159)|
+10,177,initial planned capacity for connection,-455,772,72,42,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,178,177,1,1,0,0,0,0,192,1,-1--1--1,,1|(-518,867)|
+1,179,177,174,1,0,0,0,0,192,0,-1--1--1,,1|(-227,691)|
+10,180,Available capacity for connection,522,580,87,29,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,181,180,43,1,0,0,0,0,192,0,-1--1--1,,1|(645,632)|
+1,182,18,43,1,0,0,0,0,192,0,-1--1--1,,1|(562,707)|
+10,183,initial capacity per area,-200,509,57,18,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,184,183,174,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,185,initial connected buildings,1014,543,76,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,186,185,19,1,0,0,0,0,192,1,-1--1--1,,1|(990,611)|
+10,187,average heating requirements per year,382,506,82,42,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,188,187,43,1,0,0,0,0,192,0,-1--1--1,,1|(611,594)|
+10,189,DHC to HP,-875,1067,48,16,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,190,freeing capacity from buildings disconnecting,-884,977,78,36,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,191,189,190,1,0,0,0,0,192,0,-1--1--1,,1|(-866,1037)|
+1,192,105,190,1,0,0,0,0,192,0,-1--1--1,,1|(-898,1082)|
+1,193,190,6,1,0,0,0,0,192,0,-1--1--1,,1|(-791,979)|
+10,194,capacity taken by newly committed buildings,-277,1003,64,36,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,195,14,194,1,0,0,0,0,192,0,-1--1--1,,1|(-313,1070)|
+1,196,194,11,1,0,0,0,0,192,0,-1--1--1,,1|(-294,930)|
+10,197,average heating requirements per year,-573,1000,66,36,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,198,197,194,1,0,0,0,0,192,0,-1--1--1,,1|(-400,1034)|
+10,199,initial number of HPs,511,1310,63,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,200,199,17,1,0,0,0,0,192,1,-1--1--1,,1|(638,1286)|
+10,201,Time,799,1024,29,10,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,202,Time,965,1285,29,10,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,203,INITIAL TIME,799,1024,56,10,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,204,number of HPs replaced,835,1074,60,26,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,205,204,39,1,0,0,0,0,192,0,-1--1--1,,1|(843,1030)|
+10,206,number of DHC contracts renewed,1125,1208,73,26,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,207,206,90,1,0,0,0,0,192,0,-1--1--1,,1|(1048,1247)|
+10,208,gross investment costs of heating systems,-866,-7,64,36,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,209,208,150,1,0,0,0,0,192,0,-1--1--1,,1|(-718,-23)|
+10,210,overall market share of heating systems,1994,1052,75,26,8,3,0,0,-1,1,0,0,0,0,0,0,0,0
+10,211,overall heating demand,1667,1104,56,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,212,average heating requirements per year,1785,1007,66,36,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,213,212,211,1,0,0,0,0,192,0,-1--1--1,,1|(1746,1073)|
+1,214,211,210,1,0,0,0,0,192,0,-1--1--1,,1|(1873,1094)|
+10,215,Buildings with oil heating,1482,974,58,26,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,216,Buildings with gas heating,1442,1023,58,26,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,217,Buildings with decentral HP,1427,1086,58,26,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,218,Buildings committed to DHC,1456,1139,71,26,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,219,Buildings connected to DHC,1500,1216,70,26,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,220,215,211,1,0,0,0,0,192,0,-1--1--1,,1|(1595,1027)|
+1,221,216,211,1,0,0,0,0,192,0,-1--1--1,,1|(1585,1079)|
+1,222,217,211,1,0,0,0,0,192,0,-1--1--1,,1|(1513,1103)|
+1,223,218,211,1,0,0,0,0,192,0,-1--1--1,,1|(1577,1140)|
+1,224,219,211,1,0,0,0,0,192,0,-1--1--1,,1|(1645,1175)|
+10,225,energy delivered by heating system,1716,876,73,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,226,215,225,1,0,0,0,0,192,0,-1--1--1,,1|(1615,881)|
+1,227,216,225,1,0,0,0,0,192,0,-1--1--1,,1|(1620,902)|
+1,228,217,225,1,0,0,0,0,192,0,-1--1--1,,1|(1588,958)|
+1,229,218,225,1,0,0,0,0,192,0,-1--1--1,,1|(1607,968)|
+1,230,219,225,1,0,0,0,0,192,0,-1--1--1,,1|(1604,1001)|
+1,231,212,225,1,0,0,0,0,192,0,-1--1--1,,1|(1780,941)|
+1,232,225,210,1,0,0,0,0,192,0,-1--1--1,,1|(1974,937)|
+10,233,overall GHG emissions from heating,2131,749,58,36,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,234,225,233,1,0,0,0,0,192,0,-1--1--1,,1|(1907,776)|
+10,235,specific GHG emissions of heating systems,1864,612,76,36,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,236,235,233,1,0,0,0,0,192,0,-1--1--1,,1|(2077,663)|
+10,237,SWITCH fossil fuel ban,1001,172,52,26,3,3,0,63,-1,1,0,0,255-255-255,0-255-255,Arial|10|U|0-0-0,0,0,0,0,0,0
+10,238,fossil fuel ban year,931,250,54,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,239,fossil fuels banned,714,219,46,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,240,Time,872,328,31,16,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,241,237,239,1,0,0,2,1,192,0,0-255-255,|||0-0-0,1|(817,175)|
+1,242,238,239,1,0,0,2,1,192,0,0-255-255,|||0-0-0,1|(801,200)|
+1,243,240,239,1,0,0,2,1,192,0,0-255-255,|||0-0-0,1|(789,238)|
+1,244,239,53,1,0,0,2,1,192,0,0-255-255,|||0-0-0,1|(270,236)|
+1,245,239,54,1,0,0,2,1,192,0,0-255-255,|||0-0-0,1|(355,267)|
+10,246,factor for HP subsidies,-587,-313,48,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,247,246,159,1,0,0,0,0,192,0,-1--1--1,,1|(-591,-224)|
+10,248,effect of storage on specific GHG of DH,-267,-430,71,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,249,248,164,1,0,0,0,0,192,0,-1--1--1,,1|(-98,-400)|
+10,250,storage commissioned,-174,-574,59,26,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,251,250,164,1,0,0,0,0,192,0,-1--1--1,,1|(-111,-491)|
+10,252,"Long-term price component",-855,426,63,18,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,253,DHC price,-1054,438,48,16,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,254,253,141,1,0,0,0,0,192,0,-1--1--1,,1|(-992,391)|
+10,255,total connected buildings,1192,485,58,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,256,19,255,1,0,0,0,0,192,0,-1--1--1,,1|(1102,535)|
+10,257,SWITCH availability utility,-336,519,63,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,258,257,174,1,0,0,0,0,192,0,-1--1--1,,1|(-198,432)|
+10,259,initial buildings with oil heating,218,784,59,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,260,259,15,1,0,0,0,0,192,1,-1--1--1,,1|(221,852)|
+10,261,initial buildings with gas heating,365,1318,62,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,262,261,16,1,0,0,0,0,192,1,-1--1--1,,1|(261,1213)|
+10,263,average age of gas heating systems,444,1185,76,18,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,264,average lifetime of gas heating systems,444,1185,80,18,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,265,average lifetime of oil heating systems,446,1073,74,18,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,266,average age of oil heating systems,446,1073,71,18,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,267,dynamic AT gas,507,1194,49,26,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,268,267,84,1,0,0,0,0,192,0,-1--1--1,,1|(444,1190)|
+10,269,dynamic AT oil,427,841,63,16,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,270,269,80,1,0,0,0,0,192,0,-1--1--1,,1|(482,964)|
+1,271,108,113,1,0,0,0,0,192,0,-1--1--1,,1|(-312,1609)|
+10,272,heat loss coeffient improvement percentage,-264,1738,68,36,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,273,272,113,1,0,0,0,0,192,0,-1--1--1,,1|(-215,1662)|
+10,274,overall heating demand by area,1653,1350,61,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,275,219,274,1,0,0,0,0,192,0,-1--1--1,,1|(1557,1298)|
+1,276,218,274,1,0,0,0,0,192,0,-1--1--1,,1|(1413,1294)|
+1,277,217,274,1,0,0,0,0,192,0,-1--1--1,,1|(1372,1377)|
+1,278,216,274,1,0,0,0,0,192,0,-1--1--1,,1|(1393,1408)|
+1,279,215,274,1,0,0,0,0,192,0,-1--1--1,,1|(1323,1402)|
+1,280,212,274,1,0,0,0,0,192,0,-1--1--1,,1|(1789,1289)|
+10,281,energy delivered,-85,475,39,18,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,282,energy delivered to buildings,-47,606,75,26,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,283,282,174,1,0,0,0,0,192,0,-1--1--1,,1|(-16,494)|
+10,284,Connected anchor loads,1973,1317,54,26,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,285,284,274,1,0,0,0,0,192,0,-1--1--1,,1|(1809,1410)|
+1,286,284,211,1,0,0,0,0,192,0,-1--1--1,,1|(1728,1175)|
+1,287,284,225,1,0,0,0,0,192,0,-1--1--1,,1|(1877,947)|
+10,288,SWITCH finOnly,937,-118,59,26,3,3,0,63,-1,1,0,0,255-255-255,255-128-64,Arial|10|U|0-0-0,0,1,0,0,0,0
+1,289,288,119,1,0,0,2,1,192,0,255-128-64,|||0-0-0,1|(719,-248)|
+1,290,288,121,1,0,0,2,1,192,0,255-128-64,|||0-0-0,1|(723,-308)|
+1,291,288,153,1,0,0,2,1,192,0,255-128-64,|||0-0-0,1|(256,-343)|
+1,292,288,117,1,0,0,2,1,192,0,255-128-64,|||0-0-0,1|(664,-421)|
+1,293,288,58,1,0,0,2,1,192,0,255-128-64,|||0-0-0,1|(457,113)|
+10,294,annual DHW use,-615,1674,62,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,295,294,105,1,0,0,0,0,192,0,-1--1--1,,1|(-800,1265)|
+10,296,total number of buildings,417,1532,59,26,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+1,297,261,296,1,1,0,0,0,192,0,-1--1--1,,1|(353,1450)|
+1,298,259,296,1,1,0,0,0,192,0,-1--1--1,,1|(319,1461)|
+1,299,185,296,1,1,0,0,0,192,0,-1--1--1,,1|(656,1406)|
+1,300,199,296,1,1,0,0,0,192,0,-1--1--1,,1|(501,1439)|
+10,301,Committed anchor loads,1891,1446,54,26,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,302,301,211,1,0,0,0,0,192,0,-1--1--1,,1|(1694,1217)|
+1,303,301,274,1,0,0,0,0,192,0,-1--1--1,,1|(1716,1420)|
+1,304,301,225,1,0,0,0,0,192,0,-1--1--1,,1|(2125,1271)|
+10,305,Familiarity with HP in MFH,1361,283,58,26,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+12,306,48,1099,280,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,307,309,306,100,0,0,22,0,192,0,-1--1--1,,1|(1154,280)|
+1,308,309,305,4,0,0,22,0,192,0,-1--1--1,,1|(1257,280)|
+11,309,0,1206,280,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,310,HP familiarity gain,1206,314,51,26,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,311,HP familiarity due to WOM,1400,531,75,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,312,210,311,1,0,0,0,0,192,0,-1--1--1,,1|(1578,577)|
+10,313,effective contact rate,1608,437,61,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,314,313,311,1,0,0,0,0,192,0,-1--1--1,,1|(1473,443)|
+1,315,311,310,1,0,0,0,0,192,0,-1--1--1,,1|(1272,404)|
+1,316,305,310,1,0,0,0,0,192,0,-1--1--1,,1|(1312,351)|
+1,317,305,52,1,0,0,0,0,192,0,-1--1--1,,1|(1022,106)|
+1,318,288,52,1,0,0,2,1,192,0,255-128-64,|||0-0-0,1|(720,-97)|
+10,319,initial familiarity with HP in MFH,1415,71,61,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,320,319,305,1,0,0,0,0,192,1,-1--1--1,,1|(1444,194)|
+1,321,18,174,1,0,0,0,0,192,0,-1--1--1,,1|(134,466)|
+1,322,187,174,1,0,0,0,0,192,0,-1--1--1,,1|(12,433)|
+10,323,number of buildings per area,380,1394,75,26,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+1,324,261,323,1,1,0,0,0,192,0,-1--1--1,,1|(315,1355)|
+1,325,199,323,1,1,0,0,0,192,0,-1--1--1,,1|(485,1375)|
+1,326,259,323,1,1,0,0,0,192,0,-1--1--1,,1|(258,1323)|
+1,327,185,323,1,1,0,0,0,192,0,-1--1--1,,1|(761,1299)|
+10,328,SWITCH fossil fuel ban,641,1012,56,26,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,329,328,84,1,0,0,0,0,192,0,-1--1--1,,1|(611,1138)|
+1,330,328,80,1,0,0,0,0,192,0,-1--1--1,,1|(586,1041)|
+10,331,annualized costs of heating systems per apartment,-1106,138,74,36,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,332,134,331,1,0,0,0,0,192,0,-1--1--1,,1|(-918,75)|
+10,333,apartments per building,-1284,-94,63,26,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,334,333,331,1,0,0,0,0,192,0,-1--1--1,,1|(-1111,-16)|
+10,335,annualized costs of HS per apartment for a single area,-1361,158,78,36,8,3,0,0,-1,1,0,0,0,0,0,0,0,0
+1,336,331,335,1,0,0,0,0,192,0,-1--1--1,,1|(-1232,101)|
+10,337,SWITCH mandatory connection,1144,-79,71,26,3,3,0,63,-1,1,0,0,255-255-255,0-128-0,Arial|10|U|0-0-0,0,0,0,0,0,0
+10,338,year of mandatory connection,1123,-23,68,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,339,connection mandatory,829,-16,46,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,340,Available capacity for sale,1066,52,65,26,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,341,337,339,1,0,0,2,1,192,0,0-128-0,|||0-0-0,1|(918,-60)|
+1,342,338,339,1,0,0,2,1,192,0,0-128-0,|||0-0-0,1|(971,-45)|
+1,343,340,339,1,0,0,2,1,192,0,0-128-0,|||0-0-0,1|(949,-9)|
+1,344,240,339,1,0,0,2,1,192,0,0-128-0,|||0-0-0,1|(910,33)|
+1,345,339,56,1,0,0,2,1,192,0,0-128-0,|||0-0-0,1|(744,287)|
+1,346,339,55,1,0,0,2,1,192,0,0-128-0,|||0-0-0,1|(567,169)|
+1,347,339,54,1,0,0,2,1,192,0,0-128-0,|||0-0-0,1|(313,260)|
+1,348,339,53,0,0,0,2,1,192,0,0-128-0,|||0-0-0,1|(0,0)|
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Finances
+$-1--1--1,0,|12||-1--1--1|-1--1--1|-1--1--1|-1--1--1|-1--1--1|96,96,100,0
+10,1,"Long-term price component",749,-112,60,26,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+12,2,48,492,-113,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,3,5,2,100,0,0,22,0,192,0,-1--1--1,,1|(549,-113)|
+1,4,5,1,4,0,0,22,0,192,0,-1--1--1,,1|(648,-113)|
+11,5,0,602,-113,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,6,"long-term price change rate",602,-76,59,29,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,7,initial DHC price,721,-195,49,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,8,AT DHC price change,447,-33,60,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,9,8,6,1,0,0,0,1,192,0,0-255-255,|||0-0-0,1|(568,-25)|
+10,10,"indicated long-term DHC price",675,76,47,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,11,10,6,1,0,0,0,1,192,0,0-255-255,|||0-0-0,1|(645,-23)|
+1,12,1,6,1,0,0,0,1,192,0,0-255-255,|||0-0-0,1|(697,-50)|
+10,13,annual revenues,104,111,43,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,14,annual costs,83,258,58,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,15,energy delivered,-87,-18,58,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,16,15,13,1,0,0,0,0,192,0,-1--1--1,,1|(41,27)|
+10,17,procurement costs,-76,305,61,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,18,operation and maintenance costs,-12,398,86,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,19,interests from investments,179,431,57,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,20,17,14,1,0,0,0,1,192,0,255-128-0,|||0-0-0,1|(36,280)|
+1,21,18,14,1,0,0,0,1,192,0,128-255-128,|||0-0-0,1|(50,338)|
+1,22,19,14,1,0,0,0,1,192,0,128-0-128,|||0-0-0,1|(146,339)|
+10,23,distribution spending,236,996,60,29,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,24,generation spending,255,899,56,29,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,25,service spending,-266,883,49,29,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,26,storage spending,260,820,49,29,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,27,transmission spending,272,718,65,29,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,28,Remaining construction time distribution,1437,214,81,42,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,29,Remaining construction time service,1382,327,81,42,8,2,1,3,-1,1,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,30,Replacement value of infrastructure,-80,667,99,29,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+12,31,48,-379,660,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,32,34,31,100,0,0,22,0,192,0,-1--1--1,,1|(-322,660)|
+1,33,34,30,4,0,0,22,0,192,0,-1--1--1,,1|(-221,660)|
+11,34,0,-270,660,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,35,replacement value increase,-270,697,66,29,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,36,23,35,1,0,0,0,1,192,0,128-255-128,|||0-0-0,1|(-119,864)|
+1,37,24,35,1,0,0,0,1,192,0,128-255-128,|||0-0-0,1|(-160,815)|
+1,38,25,35,1,0,0,0,1,192,0,128-255-128,|||0-0-0,1|(-288,759)|
+1,39,26,35,1,0,0,0,1,192,0,128-255-128,|||0-0-0,1|(-116,824)|
+1,40,27,35,1,0,0,0,1,192,0,128-255-128,|||0-0-0,1|(5,834)|
+10,41,"O&M fraction",-405,290,62,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,42,41,18,1,0,0,0,1,192,0,128-255-128,|||0-0-0,1|(-221,430)|
+1,43,30,18,1,0,0,0,1,192,0,128-255-128,|||0-0-0,1|(8,488)|
+10,44,"O&M fraction",1352,-306,42,29,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,45,7,1,1,0,0,0,0,192,1,-1--1--1,,1|(750,-137)|
+10,46,investment spending,74,666,52,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,47,24,46,1,0,0,0,1,192,0,128-255-128,|||0-0-0,1|(201,783)|
+1,48,25,46,1,0,0,0,1,192,0,128-255-128,|||0-0-0,1|(-44,803)|
+1,49,26,46,1,0,0,0,1,192,0,128-255-128,|||0-0-0,1|(165,686)|
+1,50,27,46,1,0,0,0,1,192,0,128-255-128,|||0-0-0,1|(184,674)|
+10,51,discount rate,116,530,46,29,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,52,51,19,1,0,0,0,1,192,0,128-0-128,|||0-0-0,1|(178,469)|
+1,53,15,17,1,0,0,0,1,192,0,255-128-0,|||0-0-0,1|(-110,233)|
+10,54,energy procurement price,-312,202,86,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,55,54,17,1,0,0,0,1,192,0,255-128-0,|||0-0-0,1|(-180,306)|
+10,56,initial replacement value,-214,551,87,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,57,56,30,1,0,0,0,0,192,1,-1--1--1,,1|(-69,593)|
+10,58,average heating requirements per year,-89,-315,82,42,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,59,Buildings connected to DHC,16,-183,60,42,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,60,Connected anchor loads,131,-277,65,29,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,61,60,15,1,0,0,0,0,192,0,-1--1--1,,1|(57,-106)|
+10,62,forecasted discounted costs,883,-22,82,29,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,63,62,10,1,0,0,0,1,192,0,0-255-255,|||0-0-0,1|(774,18)|
+10,64,overall energy delivered,-261,-5,54,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,65,15,64,1,0,0,0,0,192,0,-1--1--1,,1|(-199,-36)|
+10,66,total forecasted energy sales,894,46,63,26,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,67,66,10,1,0,0,0,1,192,0,0-255-255,|||0-0-0,1|(833,28)|
+10,68,forecasted energy sales per area,650,109,71,18,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,69,annual cash flow,244,202,63,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,70,13,69,1,0,0,0,0,192,0,-1--1--1,,1|(222,142)|
+1,71,14,69,1,0,0,0,0,192,0,-1--1--1,,1|(193,252)|
+10,72,initial reserve or deficit,750,494,61,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,73,23,46,1,0,0,0,1,192,0,128-255-128,|||0-0-0,1|(235,774)|
+10,74,storage commissioned,-579,82,59,26,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,75,74,54,1,0,0,0,1,192,0,255-128-0,|||0-0-0,1|(-427,195)|
+10,76,initial energy procurement price,-397,106,69,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,77,76,54,1,0,0,0,1,192,0,255-128-0,|||0-0-0,1|(-385,153)|
+10,78,storage effect on energy procurement price,-640,239,75,36,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,79,78,54,1,0,0,0,1,192,0,255-128-0,|||0-0-0,1|(-437,244)|
+10,80,Debt transmission,644,676,50,26,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,81,Debt storage,646,761,49,26,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,82,Debt generation,659,829,61,26,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,83,Debt distribution,661,908,64,26,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+12,84,48,441,672,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,85,87,84,100,0,0,22,0,192,0,-1--1--1,,1|(471,672)|
+1,86,87,80,4,0,0,22,0,192,0,-1--1--1,,1|(548,672)|
+11,87,0,497,672,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,88,new debt transmission,497,706,50,26,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+12,89,48,439,754,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,90,92,89,100,0,0,22,0,192,0,-1--1--1,,1|(470,754)|
+1,91,92,81,4,0,0,22,0,192,0,-1--1--1,,1|(550,754)|
+11,92,0,498,754,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,93,new debt storage,498,788,65,26,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+12,94,48,434,828,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,95,97,94,100,0,0,22,0,192,0,-1--1--1,,1|(469,828)|
+1,96,97,82,4,0,0,22,0,192,0,-1--1--1,,1|(552,828)|
+11,97,0,501,828,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,98,new debt generation,501,862,46,26,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+12,99,48,435,920,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,100,102,99,100,0,0,22,0,192,0,-1--1--1,,1|(465,920)|
+1,101,102,83,4,0,0,22,0,192,0,-1--1--1,,1|(547,920)|
+11,102,0,492,920,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,103,new debt distribution,492,954,46,26,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,104,27,88,1,0,0,0,1,192,0,128-0-128,|||0-0-0,1|(458,663)|
+1,105,26,93,1,0,0,0,1,192,0,128-0-128,|||0-0-0,1|(408,769)|
+1,106,24,98,1,0,0,0,1,192,0,128-0-128,|||0-0-0,1|(433,865)|
+1,107,23,103,1,0,0,0,1,192,0,128-0-128,|||0-0-0,1|(414,1034)|
+12,108,48,892,676,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,109,111,80,100,0,0,22,0,192,0,-1--1--1,,1|(738,676)|
+1,110,111,108,4,0,0,22,0,192,0,-1--1--1,,1|(838,676)|
+11,111,0,788,676,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,112,debt amortization transmission,788,710,66,26,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+12,113,48,906,761,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,114,116,81,100,0,0,22,0,192,0,-1--1--1,,1|(742,761)|
+1,115,116,113,4,0,0,22,0,192,0,-1--1--1,,1|(848,761)|
+11,116,0,795,761,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,117,debt amortization storage,795,795,66,26,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+12,118,48,906,829,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,119,121,82,100,0,0,22,0,192,0,-1--1--1,,1|(761,829)|
+1,120,121,118,4,0,0,22,1,192,0,128-0-128,|||0-0-0,1|(855,829)|
+11,121,0,808,829,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,122,debt amortization generation,808,863,66,26,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+12,123,48,911,908,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,124,126,83,100,0,0,22,0,192,0,-1--1--1,,1|(766,908)|
+1,125,126,123,4,0,0,22,0,192,0,-1--1--1,,1|(860,908)|
+11,126,0,813,908,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,127,debt amortization distribution,813,942,66,26,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,128,credit transmission,1074,672,54,26,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,129,credit storage,1040,755,61,16,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,130,credit generation,1036,835,47,26,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,131,credit for distribution construction,1045,924,52,36,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,132,amortization period,912,1040,53,26,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,133,128,112,1,0,0,0,1,192,0,128-0-128,|||0-0-0,1|(877,652)|
+1,134,129,117,1,0,0,0,1,192,0,128-0-128,|||0-0-0,1|(891,735)|
+1,135,130,122,1,0,0,0,1,192,0,128-0-128,|||0-0-0,1|(900,806)|
+1,136,131,127,1,0,0,0,1,192,0,128-0-128,|||0-0-0,1|(940,878)|
+1,137,132,127,1,0,0,0,1,192,0,128-0-128,|||0-0-0,1|(917,996)|
+1,138,132,122,1,0,0,0,1,192,0,128-0-128,|||0-0-0,1|(942,914)|
+1,139,132,117,1,0,0,0,1,192,0,128-0-128,|||0-0-0,1|(947,857)|
+1,140,132,112,1,0,0,0,1,192,0,128-0-128,|||0-0-0,1|(931,756)|
+10,141,amortization,590,503,49,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,142,112,141,1,0,0,0,1,192,0,128-0-128,|||0-0-0,1|(719,568)|
+1,143,117,141,1,0,0,0,1,192,0,128-0-128,|||0-0-0,1|(790,588)|
+1,144,122,141,1,0,0,0,1,192,0,128-0-128,|||0-0-0,1|(718,576)|
+1,145,127,141,1,0,0,0,1,192,0,128-0-128,|||0-0-0,1|(691,576)|
+1,146,141,14,1,0,0,0,1,192,0,128-0-128,|||0-0-0,1|(343,419)|
+1,147,80,112,1,0,0,0,1,192,0,128-0-128,|||0-0-0,1|(720,724)|
+1,148,81,117,0,0,0,0,1,192,0,128-0-128,|||0-0-0,1|(0,0)|
+1,149,82,122,0,0,0,0,1,192,0,128-0-128,|||0-0-0,1|(0,0)|
+1,150,83,127,0,0,0,0,1,192,0,128-0-128,|||0-0-0,1|(0,0)|
+10,151,total debt from investments,296,550,57,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,152,80,151,1,0,0,0,1,192,0,128-0-128,|||0-0-0,1|(447,560)|
+1,153,81,151,1,0,0,0,1,192,0,128-0-128,|||0-0-0,1|(487,617)|
+1,154,82,151,1,0,0,0,1,192,0,128-0-128,|||0-0-0,1|(440,611)|
+1,155,83,151,1,0,0,0,1,192,0,128-0-128,|||0-0-0,1|(390,620)|
+1,156,151,19,1,0,0,0,1,192,0,128-0-128,|||0-0-0,1|(262,481)|
+10,157,"Short-term price component",1197,110,62,26,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+12,158,48,949,111,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,159,161,158,100,0,0,22,0,192,0,-1--1--1,,1|(1000,111)|
+1,160,161,157,4,0,0,22,0,192,0,-1--1--1,,1|(1094,111)|
+11,161,0,1047,111,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,162,"short-term price adjustment rate",1047,145,61,26,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,163,"indicated short-term price component",1099,251,76,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,164,"AT short-term price adjustment",945,202,64,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,165,164,162,1,0,0,0,1,192,0,64-128-128,|||0-0-0,1|(1029,175)|
+1,166,163,162,1,0,0,0,1,192,0,64-128-128,|||0-0-0,1|(1070,204)|
+1,167,157,162,1,0,0,0,1,192,0,64-128-128,|||0-0-0,1|(1152,167)|
+10,168,"initial short-term price component",1232,-69,63,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,169,168,157,1,0,0,0,0,192,1,-1--1--1,,1|(1273,-7)|
+10,170,energy delivered,1118,388,42,26,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,171,170,163,1,0,0,0,1,192,0,64-128-128,|||0-0-0,1|(1149,313)|
+10,172,DHC price,1050,-97,46,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,173,1,172,1,0,0,0,0,192,0,-1--1--1,,1|(981,-137)|
+1,174,157,172,1,0,0,0,1,192,0,64-128-128,|||0-0-0,1|(1144,-59)|
+1,175,172,13,1,0,0,0,0,192,0,-1--1--1,,1|(719,-220)|
+10,176,maximum reserve level,774,150,53,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,177,"SWITCH short-term price component",1057,5,70,26,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+1,178,177,162,1,1,0,0,1,192,0,64-128-128,|||0-0-0,1|(1026,69)|
+1,179,177,10,1,1,0,0,1,192,0,0-255-255,|||0-0-0,1|(978,-59)|
+10,180,SWITCH storage effect on price,-678,328,59,26,8,3,0,58,-1,1,0,0,0-0-0,0-0-0,Arial|10|U|0-0-0,0,0,0,0,0,0
+1,181,180,78,1,0,0,0,1,192,0,255-128-0,|||0-0-0,1|(-572,319)|
+10,182,energy delivered to buildings,-132,-180,63,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,183,182,15,1,0,0,0,0,192,0,-1--1--1,,1|(-131,-114)|
+1,184,58,182,1,0,0,0,0,192,0,-1--1--1,,1|(-76,-273)|
+1,185,59,182,1,0,0,0,0,192,0,-1--1--1,,1|(-20,-163)|
+10,186,"earnings from short-term price",1357,213,61,26,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+1,187,157,186,1,1,0,0,0,192,0,-1--1--1,,1|(1336,172)|
+1,188,170,186,1,1,0,0,0,192,0,-1--1--1,,1|(1355,283)|
+10,189,energy delivered,1042,-234,42,26,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,190,"earnings from long-term price",1187,-222,58,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,191,1,190,1,0,0,0,0,192,0,-1--1--1,,1|(1128,-170)|
+1,192,189,190,1,0,0,0,0,192,0,-1--1--1,,1|(1159,-275)|
+10,193,Reserve,612,245,46,26,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,194,Deficit,607,384,46,26,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+12,195,48,454,243,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,196,198,195,100,0,0,22,0,192,0,-1--1--1,,1|(486,243)|
+1,197,198,193,4,0,0,22,0,192,0,-1--1--1,,1|(543,243)|
+11,198,0,515,243,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,199,deposit into reserve,515,277,46,26,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+12,200,48,794,245,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,201,203,193,100,0,0,22,0,192,0,-1--1--1,,1|(686,245)|
+1,202,203,200,4,0,0,22,0,192,0,-1--1--1,,1|(755,245)|
+11,203,0,721,245,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,204,withdrawal from reserve,721,279,62,26,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+12,205,48,463,385,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,206,208,205,100,0,0,22,0,192,0,-1--1--1,,1|(492,385)|
+1,207,208,194,4,0,0,22,0,192,0,-1--1--1,,1|(542,385)|
+11,208,0,517,385,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,209,deficit increase,517,419,58,26,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+12,210,48,799,384,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,211,213,194,100,0,0,22,0,192,0,-1--1--1,,1|(684,384)|
+1,212,213,210,4,0,0,22,0,192,0,-1--1--1,,1|(758,384)|
+11,213,0,721,384,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,214,deficit decrease,721,418,60,26,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,215,194,163,1,0,0,0,1,192,0,64-128-128,|||0-0-0,1|(1027,363)|
+1,216,69,199,1,0,0,0,0,192,0,-1--1--1,,1|(411,200)|
+1,217,69,204,1,0,0,0,0,192,0,-1--1--1,,1|(549,158)|
+1,218,69,209,1,0,0,0,0,192,0,-1--1--1,,1|(438,309)|
+1,219,69,214,1,0,0,0,0,192,0,-1--1--1,,1|(610,346)|
+1,220,194,214,1,0,0,0,0,192,0,-1--1--1,,1|(653,450)|
+1,221,194,199,1,0,0,0,0,192,0,-1--1--1,,1|(584,304)|
+1,222,193,204,1,0,0,0,0,192,0,-1--1--1,,1|(669,314)|
+1,223,193,209,1,0,0,0,0,192,0,-1--1--1,,1|(527,336)|
+10,224,initial reserve,673,147,52,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,225,224,193,1,0,0,0,0,192,1,-1--1--1,,1|(672,204)|
+10,226,initial deficit,332,341,48,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,227,226,194,1,0,0,0,0,192,1,-1--1--1,,1|(499,327)|
+10,228,interests from deficit,318,434,54,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,229,194,228,1,0,0,0,1,192,0,128-0-128,|||0-0-0,1|(450,476)|
+1,230,51,228,1,0,0,0,1,192,0,128-0-128,|||0-0-0,1|(287,465)|
+1,231,228,14,1,0,0,0,1,192,0,128-0-128,|||0-0-0,1|(195,372)|
+10,232,TIME STEP,1099,295,52,10,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,233,annual costs,1537,308,57,16,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,234,193,163,1,0,0,0,1,192,0,64-128-128,|||0-0-0,1|(875,318)|
+1,235,176,163,1,0,0,0,1,192,0,64-128-128,|||0-0-0,1|(907,261)|
+10,236,smoothed annual cash flow,238,47,65,26,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+1,237,69,236,1,1,0,0,0,192,0,-1--1--1,,1|(261,149)|
+10,238,TIME STEP,293,-47,52,10,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,239,costs per energy delivered,-9,191,62,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,240,14,239,1,0,0,0,0,192,0,-1--1--1,,1|(94,230)|
+1,241,15,239,1,0,0,0,0,192,0,-1--1--1,,1|(-51,107)|
+10,242,annual cash flow after deficit reduction,395,92,67,26,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+1,243,214,242,1,1,0,0,0,192,0,-1--1--1,,1|(515,126)|
+1,244,69,242,1,1,0,0,0,192,0,-1--1--1,,1|(329,136)|
+10,245,smoothed cash flow after deficit reduction,353,24,73,36,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+1,246,242,245,1,1,0,0,0,192,0,-1--1--1,,1|(478,24)|
+10,247,SWITCH storage,-896,238,65,39,8,2,0,51,-1,1,0,0,128-128-128,0-0-0,Arial||U|128-128-128,0,0,0,0,0,0
+10,248,levelized costs,1526,98,63,16,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,249,"short-term unit costs",-341,-127,58,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,250,14,249,1,0,0,0,0,192,0,-1--1--1,,1|(-332,-10)|
+1,251,64,249,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,252,annual heating costs per apartment,456,-400,76,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,253,apartments per building,157,-493,59,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,254,253,252,1,0,0,0,0,192,0,-1--1--1,,1|(409,-464)|
+1,255,58,252,1,0,0,0,0,192,0,-1--1--1,,1|(237,-399)|
+1,256,172,252,1,0,0,0,0,192,0,-1--1--1,,1|(650,-363)|
+10,257,target cash flow,1341,490,60,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,258,difference from target cash flow,1174,587,60,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,259,69,258,1,0,0,0,1,192,0,64-128-128,|||0-0-0,1|(890,574)|
+1,260,257,258,1,0,0,0,1,192,0,64-128-128,|||0-0-0,1|(1326,554)|
+1,261,258,163,1,0,0,0,1,192,0,64-128-128,|||0-0-0,1|(1186,350)|
+1,262,14,163,1,0,0,0,1,64,0,64-128-128,|||0-0-0,1|(746,461)|
+1,263,194,10,0,1,0,0,1,64,0,0-255-255,|||0-0-0,1|(0,0)|
+1,264,193,10,0,1,0,0,1,192,0,0-255-255,|||0-0-0,1|(0,0)|
+1,265,176,10,0,1,0,0,1,192,0,0-255-255,|||0-0-0,1|(0,0)|
+10,266,"SWITCH long-term price increase",315,-161,67,26,8,3,1,0,-1,0,0,0,0,0,0,0,0,0
+1,267,266,172,1,1,0,0,0,192,0,-1--1--1,,1|(790,-252)|
+1,268,266,163,0,1,0,0,1,192,0,64-128-128,|||0-0-0,1|(0,0)|
+1,269,266,168,1,1,0,0,0,192,0,-1--1--1,,1|(1192,-128)|
+1,270,190,163,1,0,0,0,1,64,0,64-128-128,|||0-0-0,1|(1357,52)|
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Implementation and business plan
+$-1--1--1,0,|12||-1--1--1|-1--1--1|-1--1--1|-1--1--1|-1--1--1|96,96,100,0
+10,1,Remaining construction time distribution,325,954,81,42,3,3,0,1,-1,1,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+12,2,48,689,954,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,3,5,1,100,0,0,22,0,192,0,-1--1--1,,1|(471,954)|
+1,4,5,2,4,0,0,22,0,192,0,-1--1--1,,1|(613,954)|
+11,5,0,542,954,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,6,construction progress distribution,542,1004,58,42,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,7,construction speed distribution,623,619,88,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,8,delay,551,504,42,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,9,slow progress,660,492,42,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,10,8,7,1,0,0,0,0,192,0,-1--1--1,,1|(565,557)|
+1,11,9,7,1,0,0,0,0,192,0,-1--1--1,,1|(614,582)|
+1,12,7,6,1,0,0,0,0,192,0,-1--1--1,,1|(608,915)|
+12,13,48,1317,982,10,8,0,3,1,0,-1,0,0,0,0,0,0,0,0,0
+1,14,15,13,4,1,0,22,0,192,0,-1--1--1,,1|(1236,982)|
+11,15,0,1160,982,6,8,34,3,1,0,1,0,0,0,0,0,0,0,0,0
+10,16,distribution construction decision update,1160,1032,74,42,40,3,1,0,-1,0,0,0,0,0,0,0,0,0
+10,17,Committed anchor loads,1716,518,60,29,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,18,Connected anchor loads,2140,524,60,29,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,19,21,17,100,0,0,22,0,192,0,-1--1--1,,1|(1860,496)|
+1,20,21,18,4,0,0,22,0,192,0,-1--1--1,,1|(2018,496)|
+11,21,0,1951,496,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,22,anchor load connection rate,1951,533,72,29,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,23,Available capacity for connection,959,350,82,29,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+12,24,48,1309,350,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,25,27,23,100,0,0,22,0,192,0,-1--1--1,,1|(1100,350)|
+1,26,27,24,4,0,0,22,0,192,0,-1--1--1,,1|(1235,350)|
+11,27,0,1165,350,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,28,available capacity decrease,1165,387,81,29,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,29,DHC connection rate,1436,446,79,29,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,30,total connection rate,1251,501,72,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,31,30,28,1,0,0,0,0,192,0,-1--1--1,,1|(1243,443)|
+1,32,29,30,1,0,0,0,0,192,0,-1--1--1,,1|(1357,459)|
+10,33,Remaining credit distribution,277,797,78,29,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+12,34,48,626,797,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,35,37,33,100,0,0,22,0,192,0,-1--1--1,,1|(417,797)|
+1,36,37,34,4,0,0,22,0,192,0,-1--1--1,,1|(553,797)|
+11,37,0,485,797,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,38,distribution spending,485,834,54,29,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,39,7,38,1,0,0,0,0,192,0,-1--1--1,,1|(575,746)|
+10,40,Remaining credit service,1043,-13,61,29,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,41,Remaining construction time service,1716,-29,90,39,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+12,42,48,2050,-26,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,43,45,41,100,0,0,22,0,192,0,-1--1--1,,1|(1850,-26)|
+1,44,45,42,4,0,0,22,0,192,0,-1--1--1,,1|(1973,-26)|
+11,45,0,1901,-26,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,46,construction progress service,1901,11,74,29,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+12,47,48,1357,-13,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,48,50,40,100,0,0,22,0,192,0,-1--1--1,,1|(1161,-13)|
+1,49,50,47,4,0,0,22,0,192,0,-1--1--1,,1|(1289,-13)|
+11,50,0,1225,-13,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,51,service spending,1225,24,43,29,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,52,Remaining construction time transmission,200,1077,81,42,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,53,Remaining construction time generation,177,1404,81,42,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,54,Remaining construction time storage,216,1899,81,42,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+12,55,48,655,1077,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,56,58,52,100,0,0,22,0,192,0,-1--1--1,,1|(369,1077)|
+1,57,58,55,4,0,0,22,0,192,0,-1--1--1,,1|(557,1077)|
+11,58,0,463,1077,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,59,construction progress transmission,463,1127,60,42,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+12,60,48,748,1404,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,61,63,53,100,0,0,22,0,192,0,-1--1--1,,1|(375,1404)|
+1,62,63,60,4,0,0,22,0,192,0,-1--1--1,,1|(621,1404)|
+11,63,0,498,1404,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,64,construction progress generation,498,1454,58,42,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+12,65,48,750,1899,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,66,68,54,100,0,0,22,0,192,0,-1--1--1,,1|(404,1899)|
+1,67,68,65,4,0,0,22,0,192,0,-1--1--1,,1|(632,1899)|
+11,68,0,518,1899,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,69,construction progress storage,518,1936,77,29,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,70,52,59,1,0,0,0,0,192,0,-1--1--1,,1|(356,1149)|
+1,71,53,64,1,0,0,0,0,192,0,-1--1--1,,1|(400,1465)|
+1,72,54,69,1,0,0,0,0,192,0,-1--1--1,,1|(432,1975)|
+10,73,construction speed transmission,780,1199,88,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,74,construction speed generation,837,1465,88,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,75,construction speed storage,749,2049,65,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,76,73,59,1,0,0,0,0,192,0,-1--1--1,,1|(563,1209)|
+1,77,74,64,1,0,0,0,0,192,0,-1--1--1,,1|(631,1473)|
+1,78,75,69,1,0,0,0,0,192,0,-1--1--1,,1|(575,2020)|
+10,79,Remaining credit transmission,1309,1230,78,29,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,80,Remaining credit generation,1169,1592,78,29,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,81,Remaining credit storage,1109,2007,64,29,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+12,82,48,1742,1230,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,83,85,79,100,0,0,22,0,192,0,-1--1--1,,1|(1470,1230)|
+1,84,85,82,4,0,0,22,0,192,0,-1--1--1,,1|(1648,1230)|
+11,85,0,1559,1230,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,86,transmission spending,1559,1267,60,29,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+12,87,48,1680,1592,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,88,90,80,100,0,0,22,0,192,0,-1--1--1,,1|(1349,1592)|
+1,89,90,87,4,0,0,22,0,192,0,-1--1--1,,1|(1567,1592)|
+11,90,0,1458,1592,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,91,generation spending,1458,1629,51,29,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+12,92,48,1607,2007,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,93,95,81,100,0,0,22,0,192,0,-1--1--1,,1|(1276,2007)|
+1,94,95,92,4,0,0,22,0,192,0,-1--1--1,,1|(1494,2007)|
+11,95,0,1385,2007,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,96,storage spending,1385,2044,43,29,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,97,73,86,1,0,0,0,0,192,0,-1--1--1,,1|(1292,1356)|
+1,98,74,91,1,0,0,0,0,192,0,-1--1--1,,1|(1079,1629)|
+1,99,75,96,1,0,0,0,0,192,0,-1--1--1,,1|(1068,2116)|
+10,100,year of construction start transmission,488,1208,81,42,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,101,100,73,1,0,0,0,0,192,0,-1--1--1,,1|(705,1263)|
+10,102,year of construction start generation,728,1558,81,42,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,103,102,74,1,0,0,0,0,192,0,-1--1--1,,1|(824,1517)|
+10,104,year of construction start storage,560,2127,81,42,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,105,104,75,1,0,0,0,0,192,0,-1--1--1,,1|(706,2119)|
+10,106,credit for distribution construction,136,418,58,42,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,107,106,33,1,0,0,0,0,192,1,-1--1--1,,1|(119,597)|
+10,108,construction time for distribution construction,440,595,81,42,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,109,108,1,1,0,0,0,0,192,1,-1--1--1,,1|(280,754)|
+1,110,108,38,1,0,0,0,0,192,0,-1--1--1,,1|(452,794)|
+10,111,planned year of construction start distribution,739,725,81,42,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,112,Time,1176,1073,35,15,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,113,106,38,1,0,0,0,0,192,0,-1--1--1,,1|(145,712)|
+1,114,111,7,1,0,0,0,0,192,0,-1--1--1,,1|(650,629)|
+1,115,112,7,1,0,0,0,0,192,0,-1--1--1,,1|(808,698)|
+10,116,initial committed anchor loads per area,1695,424,60,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,117,116,17,1,0,0,0,0,192,1,-1--1--1,,1|(1749,490)|
+1,118,17,22,1,0,0,0,0,192,0,-1--1--1,,1|(1852,471)|
+10,119,construction length transmission,261,1210,60,42,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,120,119,52,1,0,0,0,0,192,1,-1--1--1,,1|(169,1157)|
+10,121,Time,780,1246,29,10,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,122,121,73,0,1,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,123,Time,837,1462,29,10,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,124,123,74,0,1,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,125,Time,814,1770,29,10,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,126,125,75,0,1,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,127,construction length generation,174,1519,82,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,128,construction length storage,206,2053,66,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,129,127,53,1,0,0,0,0,192,1,-1--1--1,,1|(142,1457)|
+1,130,128,54,1,0,0,0,0,192,1,-1--1--1,,1|(179,1970)|
+10,131,credit transmission,1109,1228,60,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,132,131,79,1,0,0,0,0,192,1,-1--1--1,,1|(1258,1193)|
+10,133,credit generation,1036,1454,51,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,134,133,80,1,0,0,0,0,192,1,-1--1--1,,1|(1118,1524)|
+10,135,credit storage,1149,1908,42,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,136,135,81,1,0,0,0,0,192,1,-1--1--1,,1|(1141,1948)|
+10,137,construction length transmission,1750,1297,65,42,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,138,137,86,1,0,0,0,0,192,0,-1--1--1,,1|(1633,1302)|
+10,139,construction length generation,1684,1679,87,29,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,140,construction length storage,1581,2112,72,29,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,141,139,91,1,0,0,0,0,192,0,-1--1--1,,1|(1530,1684)|
+1,142,140,96,1,0,0,0,0,192,0,-1--1--1,,1|(1427,2091)|
+1,143,131,86,1,0,0,0,0,192,0,-1--1--1,,1|(1391,1173)|
+1,144,133,91,1,0,0,0,0,192,0,-1--1--1,,1|(1311,1538)|
+1,145,135,96,1,0,0,0,0,192,0,-1--1--1,,1|(1337,2007)|
+10,146,credit service,897,115,61,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,147,146,40,1,0,0,0,0,192,1,-1--1--1,,1|(940,32)|
+10,148,construction time service,1458,-99,58,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,149,148,41,1,0,0,0,0,192,1,-1--1--1,,1|(1619,-81)|
+10,150,initial planned capacity for connection,514,210,67,42,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,151,29,51,1,0,0,0,0,192,0,-1--1--1,,1|(1348,185)|
+10,152,average heating requirements per year,1291,293,82,42,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,153,service spending per connected building,1370,72,77,42,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,154,152,153,1,0,0,0,0,192,0,-1--1--1,,1|(1356,216)|
+1,155,153,51,1,0,0,0,0,192,0,-1--1--1,,1|(1296,32)|
+10,156,fraction of initial credit spent,1237,-100,75,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,157,146,156,1,0,0,0,0,192,0,-1--1--1,,1|(990,-72)|
+1,158,51,156,1,0,0,0,0,192,0,-1--1--1,,1|(1263,-40)|
+1,159,156,46,1,0,0,0,0,192,0,-1--1--1,,1|(1782,36)|
+1,160,1,6,1,0,0,0,0,192,0,-1--1--1,,1|(415,1059)|
+1,161,33,38,1,0,0,0,0,192,0,-1--1--1,,1|(368,860)|
+1,162,41,46,1,0,0,0,0,192,0,-1--1--1,,1|(1775,22)|
+10,163,initial connected anchor loads per area,2140,432,78,42,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,164,163,18,1,0,0,0,0,192,1,-1--1--1,,1|(2189,477)|
+1,165,152,30,1,0,0,0,0,192,0,-1--1--1,,1|(1309,406)|
+10,166,energy efficiency gains of connected buildings,1042,584,70,36,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,167,freeing capacity from buildings disconnecting,1192,581,64,36,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,168,planned year of construction start distribution,1149,-289,66,36,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,169,construction time for distribution construction,1286,-383,69,36,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,170,planned year of completion,1538,-310,59,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,171,169,170,1,0,0,0,0,192,0,-1--1--1,,1|(1444,-400)|
+1,172,168,170,1,0,0,0,0,192,0,-1--1--1,,1|(1379,-317)|
+1,173,148,170,1,0,0,0,0,192,0,-1--1--1,,1|(1435,-217)|
+10,174,planned year of densification start,829,-334,67,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,175,169,174,1,0,0,0,0,192,0,-1--1--1,,1|(1003,-390)|
+1,176,168,174,1,0,0,0,0,192,0,-1--1--1,,1|(949,-272)|
+10,177,Connected demand at densification start,2592,678,111,38,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+12,178,48,2035,676,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,179,181,178,100,0,0,22,0,192,0,-1--1--1,,1|(2151,676)|
+1,180,181,177,4,0,0,22,0,192,0,-1--1--1,,1|(2375,676)|
+11,181,0,2263,676,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,182,connection rate during distribution construction,2263,720,70,36,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,183,30,182,1,0,0,0,0,192,0,-1--1--1,,1|(1824,872)|
+1,184,174,182,1,0,0,0,0,192,0,-1--1--1,,1|(2193,-20)|
+10,185,Time,2461,584,31,16,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,186,185,182,1,0,0,0,0,192,0,-1--1--1,,1|(2389,600)|
+10,187,Connected demand during densification,2750,376,74,26,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+12,188,48,2338,370,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,189,191,188,100,0,0,22,0,192,0,-1--1--1,,1|(2427,370)|
+1,190,191,187,4,0,0,22,0,192,0,-1--1--1,,1|(2597,370)|
+11,191,0,2512,370,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,192,connection rate during densification,2512,404,74,26,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,193,174,192,1,0,0,0,0,192,0,-1--1--1,,1|(2047,-389)|
+1,194,30,192,1,0,0,0,0,192,0,-1--1--1,,1|(1881,668)|
+1,195,185,192,1,0,0,0,0,192,0,-1--1--1,,1|(2547,542)|
+10,196,oil to DHC,2592,734,47,10,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,197,gas to DHC,2592,734,52,10,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,198,HP to DHC,2592,734,50,10,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,199,specific investment cost for distribution grid,-100,232,73,36,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,200,199,106,1,0,0,0,0,192,0,-1--1--1,,1|(-24,354)|
+1,201,150,106,1,0,0,0,0,192,0,-1--1--1,,1|(330,365)|
+10,202,specific investment cost service pipes,406,-94,71,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,203,fraction of service investment costs charged to customer,753,-182,76,36,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,204,effective specific investment cost service pipes,685,-34,62,36,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,205,202,204,1,0,0,0,0,192,0,-1--1--1,,1|(602,-81)|
+1,206,203,204,1,0,0,0,0,192,0,-1--1--1,,1|(770,-100)|
+1,207,204,146,1,0,0,0,0,64,0,-1--1--1,,1|(827,10)|
+1,208,150,146,1,0,0,0,0,64,0,-1--1--1,,1|(683,98)|
+1,209,204,153,1,0,0,0,0,192,0,-1--1--1,,1|(987,177)|
+1,210,40,51,1,0,0,0,0,192,0,-1--1--1,,1|(1121,57)|
+10,211,year of storage commissioning,848,2231,57,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,212,104,211,1,0,0,0,0,192,0,-1--1--1,,1|(698,2215)|
+1,213,128,211,1,0,0,0,0,192,0,-1--1--1,,1|(606,2249)|
+10,214,storage commissioned,1163,2195,55,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,215,54,214,1,0,0,0,0,192,0,-1--1--1,,1|(531,2292)|
+1,216,104,214,1,0,0,0,0,192,0,-1--1--1,,1|(940,2219)|
+10,217,amortization start year,1749,1037,66,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,218,amortization period,1634,1147,49,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,219,54,75,1,0,0,0,0,192,0,-1--1--1,,1|(403,2069)|
+10,220,SWITCH storage,932,1984,59,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,221,220,135,1,0,0,0,0,192,0,-1--1--1,,1|(1087,1906)|
+10,222,value credit storage,821,1867,46,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,223,222,135,1,0,0,0,0,192,0,-1--1--1,,1|(982,1860)|
+1,224,220,214,1,0,0,0,0,192,0,-1--1--1,,1|(1047,2167)|
+10,225,overall year of construction start distribution,737,885,66,36,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,226,years between starting new constructions,860,955,55,36,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,227,225,111,1,0,0,0,0,192,0,-1--1--1,,1|(799,770)|
+1,228,226,111,1,0,0,0,0,192,0,-1--1--1,,1|(832,771)|
+1,229,53,74,1,0,0,0,0,192,0,-1--1--1,,1|(519,1557)|
+10,230,Planned capacity for connection,486,337,63,26,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,231,233,230,100,0,0,22,0,192,0,-1--1--1,,1|(628,343)|
+1,232,233,23,4,0,0,22,0,192,0,-1--1--1,,1|(798,343)|
+11,233,0,713,343,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,234,capacity implementation rate,713,377,75,26,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,235,150,230,1,0,0,0,0,192,1,-1--1--1,,1|(532,286)|
+1,236,108,234,1,0,0,0,0,192,0,-1--1--1,,1|(532,429)|
+1,237,7,234,1,0,0,0,0,192,0,-1--1--1,,1|(733,407)|
+1,238,230,234,1,0,0,0,0,192,0,-1--1--1,,1|(652,322)|
+1,239,150,234,1,0,0,0,0,192,0,-1--1--1,,1|(690,300)|
+12,240,48,957,587,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,241,243,240,100,0,0,22,0,192,0,-1--1--1,,1|(957,532)|
+1,242,243,23,4,0,0,22,0,192,0,-1--1--1,,1|(957,426)|
+11,243,0,957,479,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,244,capacity freeing rate,1025,479,60,26,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,245,167,244,1,0,0,0,0,192,0,-1--1--1,,1|(1083,496)|
+1,246,166,244,1,0,0,0,0,192,0,-1--1--1,,1|(1045,516)|
+1,247,111,22,1,0,0,0,0,192,0,-1--1--1,,1|(1594,895)|
+1,248,112,22,1,0,0,0,0,192,0,-1--1--1,,1|(1730,785)|
+10,249,construction time for distribution construction,1852,390,69,36,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,250,249,22,1,0,0,0,0,192,0,-1--1--1,,1|(1959,439)|
+10,251,total investment sum,17,-542,61,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,252,106,251,1,0,0,0,0,192,0,-1--1--1,,1|(-38,-309)|
+10,253,credit generation,373,-750,47,26,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,254,credit storage,295,-620,61,16,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,255,credit transmission,-3,-827,54,26,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,256,255,251,1,0,0,0,0,192,0,-1--1--1,,1|(-44,-629)|
+1,257,253,251,1,0,0,0,0,192,0,-1--1--1,,1|(52,-616)|
+1,258,254,251,1,0,0,0,0,192,0,-1--1--1,,1|(97,-624)|
+10,259,total planned capacity,556,-527,51,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,260,150,259,1,0,0,0,0,192,0,-1--1--1,,1|(356,-228)|
+10,261,initial capacity per area,843,-688,59,26,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,262,261,259,1,0,0,0,0,192,0,-1--1--1,,1|(612,-601)|
+10,263,initial committed anchor loads per area,741,-570,67,36,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,264,initial connected anchor loads per area,643,-403,66,36,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,265,263,259,1,0,0,0,0,192,0,-1--1--1,,1|(660,-572)|
+1,266,264,259,1,0,0,0,0,192,0,-1--1--1,,1|(543,-440)|
+10,267,new planned capacity for regular buildings,269,-472,72,36,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,268,150,267,1,0,0,0,0,192,0,-1--1--1,,1|(278,-240)|
+10,269,new planned capacity,558,-740,50,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,270,267,269,1,0,0,0,0,192,0,-1--1--1,,1|(404,-642)|
+1,271,263,269,1,0,0,0,0,192,0,-1--1--1,,1|(686,-683)|
+10,272,target capacity per area,474,-286,56,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,273,150,272,1,0,0,0,0,192,0,-1--1--1,,1|(372,-147)|
+1,274,264,272,1,0,0,0,0,192,0,-1--1--1,,1|(511,-377)|
+1,275,263,272,1,0,0,0,0,192,0,-1--1--1,,1|(730,-403)|
+1,276,261,272,1,0,0,0,0,192,0,-1--1--1,,1|(733,-290)|
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Forecast
+$-1--1--1,0,|12||-1--1--1|-1--1--1|-1--1--1|-1--1--1|-1--1--1|96,96,56,0
+10,1,Remaining credit distribution,-258,1005,84,29,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,2,Remaining credit service,-635,1567,67,29,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,3,Time,-271,1254,35,15,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,4,PV of outstanding distribution investments per area,-357,1119,80,42,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,5,3,4,1,0,0,0,1,192,0,0-128-0,|||0-0-0,1|(-321,1156)|
+10,6,discount rate,-429,1210,61,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,7,6,4,1,0,0,0,1,192,0,0-128-0,|||0-0-0,1|(-384,1143)|
+10,8,planned year of construction start distribution,19,1010,81,42,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,9,8,4,1,0,0,0,1,192,0,0-128-0,|||0-0-0,1|(-140,1011)|
+10,10,PV of forecasted energy costs,-403,915,74,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,11,initial capacity per area,576,755,66,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,12,"O&M fraction",-1242,1413,42,29,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,13,forecasted discounted costs,-1159,842,77,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,14,10,13,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,15,initial replacement value,-432,548,71,18,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,16,Replacement value of infrastructure,-1267,1256,70,42,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,17,"PV of new O&M costs per area",-793,1514,71,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,18,1,17,1,0,0,0,1,192,0,128-128-0,|||0-0-0,1|(-654,1243)|
+10,19,time horizon,-836,1685,59,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,20,Time,-1008,1570,29,10,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,21,Time,-793,1561,29,10,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,22,forecasted energy sales per area,715,1329,58,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,23,12,17,1,0,0,0,1,192,0,128-128-0,|||0-0-0,1|(-895,1466)|
+10,24,Time,1369,70,35,15,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,25,Time,895,312,29,10,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,26,levelized costs,274,552,42,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,27,13,26,1,0,0,0,0,192,0,-1--1--1,,1|(-420,216)|
+1,28,22,26,1,0,0,0,0,192,0,-1--1--1,,1|(646,878)|
+10,29,"PV of O&M costs of existing infrastructure",-1034,1382,69,36,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,30,16,29,1,0,0,0,0,192,0,-1--1--1,,1|(-1092,1310)|
+1,31,12,29,1,0,0,0,0,192,0,-1--1--1,,1|(-1142,1360)|
+1,32,19,29,1,0,0,0,0,192,0,-1--1--1,,1|(-914,1497)|
+1,33,6,29,1,0,0,0,0,192,0,-1--1--1,,1|(-849,1273)|
+1,34,29,13,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,35,estimated year of densification completion,1445,281,65,36,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,36,planned year of completion,1292,296,63,26,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,37,36,35,1,0,0,0,0,192,0,-1--1--1,,1|(1391,260)|
+10,38,actual pace of densification,1292,-6,53,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,39,planned year of densification start,1984,78,71,26,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,40,39,38,1,0,0,0,0,192,0,-1--1--1,,1|(1752,-163)|
+1,41,24,38,1,0,0,0,0,192,0,-1--1--1,,1|(1324,9)|
+1,42,38,35,1,0,0,0,0,192,0,-1--1--1,,1|(1372,184)|
+1,43,39,35,1,0,0,0,0,192,0,-1--1--1,,1|(1511,135)|
+1,44,24,35,1,0,0,0,0,192,0,-1--1--1,,1|(1416,145)|
+10,45,construction progress service,646,990,66,18,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,46,construction time service,646,990,49,18,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,47,initial planned capacity for connection,2394,460,59,36,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,48,time since densification start,1548,-52,67,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,49,24,48,1,0,0,0,0,192,0,-1--1--1,,1|(1556,11)|
+1,50,48,38,1,0,0,0,0,192,0,-1--1--1,,1|(1388,-32)|
+1,51,39,48,1,0,0,0,0,192,0,-1--1--1,,1|(1790,-51)|
+10,52,remaining demand to connect,1886,360,71,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,53,47,52,1,0,0,0,0,192,0,-1--1--1,,1|(2173,391)|
+1,54,52,35,1,0,0,0,0,192,0,-1--1--1,,1|(1651,305)|
+10,55,INITIAL TIME,1251,379,56,10,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,56,55,35,1,0,0,0,0,64,0,-1--1--1,,1|(1342,354)|
+10,57,Time,1554,1470,31,16,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,58,expected share of connected demand during construction,1287,1118,73,36,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,59,current share of target demand,2238,536,61,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,60,47,59,1,0,0,0,0,192,0,-1--1--1,,1|(2322,480)|
+10,61,estimated share at time horizon,1844,1338,61,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,62,19,61,1,0,0,0,0,192,0,-1--1--1,,1|(546,2046)|
+1,63,52,61,1,0,0,0,0,192,0,-1--1--1,,1|(2036,1239)|
+1,64,38,61,1,0,0,0,0,192,0,-1--1--1,,1|(2176,789)|
+1,65,57,61,1,0,0,0,0,192,0,-1--1--1,,1|(1745,1427)|
+1,66,59,61,1,0,0,0,0,192,0,-1--1--1,,1|(2122,1183)|
+10,67,initial planned capacity for connection,1084,938,55,27,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,68,Remaining construction time distribution,1420,372,62,27,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,69,planned year of completion,2040,1580,63,26,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,70,construction time service,2050,1266,49,18,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,71,70,61,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+1,72,58,61,1,0,0,0,0,64,0,-1--1--1,,1|(1552,1304)|
+10,73,planned year of construction start distribution,1880,1450,62,27,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,74,73,61,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,75,planned year of densification start,2074,1348,69,18,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,76,75,61,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,77,Remaining construction time distribution,1988,1388,62,27,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,78,77,61,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+1,79,47,61,1,0,0,0,0,192,0,-1--1--1,,1|(2171,1344)|
+10,80,forecasted energy sales in old grids,838,992,67,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,81,actual demand trend,1066,204,69,26,3,3,0,0,-1,1,0,0,0,0,0,0,0,0
+10,82,freeing capacity from buildings disconnecting,510,-72,64,36,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,83,energy efficiency gains of connected buildings,776,-114,70,36,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,84,capacity taken by newly committed buildings,978,-104,68,36,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,85,average heating requirements per year,838,1036,64,27,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,86,initial connected buildings,838,1036,64,18,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,87,energy delivered,704,812,42,26,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,88,INITIAL TIME,864,500,56,10,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,89,estimated demand at time horizon,1020,626,78,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,90,81,89,1,0,0,0,1,192,0,128-128-64,|||0-0-0,1|(1205,388)|
+10,91,time horizon,1134,592,57,16,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,92,91,89,1,0,0,0,1,192,0,128-128-64,|||0-0-0,1|(1097,633)|
+10,93,estimated year where maximum demand will be reached,740,568,83,36,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,94,minimum estimated demand at time horizon,922,766,74,36,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,95,87,93,1,0,0,0,1,192,0,128-128-64,|||0-0-0,1|(738,688)|
+1,96,81,93,1,0,0,0,1,192,0,128-128-64,|||0-0-0,1|(862,325)|
+1,97,25,93,1,0,0,0,1,192,0,128-128-64,|||0-0-0,1|(742,460)|
+10,98,initial capacity per area,458,510,59,26,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,99,98,93,1,0,0,0,1,192,0,128-128-64,|||0-0-0,1|(633,509)|
+1,100,98,94,1,0,0,0,1,192,0,128-128-64,|||0-0-0,1|(850,707)|
+10,101,minimum share of target at time horizon,528,648,68,36,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,102,101,94,1,0,0,0,1,192,0,128-128-64,|||0-0-0,1|(796,712)|
+1,103,98,89,1,0,0,0,1,192,0,128-128-64,|||0-0-0,1|(832,502)|
+1,104,87,89,1,0,0,0,1,192,0,128-128-64,|||0-0-0,1|(914,630)|
+1,105,80,22,1,0,0,0,1,192,0,128-128-64,|||0-0-0,1|(810,1244)|
+1,106,25,89,1,0,0,0,1,192,0,128-128-64,|||0-0-0,1|(1100,506)|
+1,107,11,80,0,0,0,0,1,64,0,128-128-64,|||0-0-0,1|(0,0)|
+10,108,Time,838,1036,29,10,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,109,108,80,0,0,0,0,1,64,0,128-128-64,|||0-0-0,1|(0,0)|
+10,110,total forecasted energy sales,713,1435,59,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,111,22,110,1,0,0,0,0,192,0,-1--1--1,,1|(741,1382)|
+10,112,forecasted energy sales during construction,1158,1036,67,36,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,113,x1,1238,582,46,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,114,x2,1490,566,46,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,115,x4,1680,578,46,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,116,y1,1336,570,46,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,117,y3,1584,578,46,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,118,y5,1970,608,46,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,119,forecasted energy sales after completion,1926,1046,67,36,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,120,initial planned capacity for connection,1779,706,59,36,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,121,120,119,1,0,0,0,1,192,0,255-128-64,|||0-0-0,1|(1941,920)|
+1,122,120,112,1,0,0,0,1,192,0,128-255-0,|||0-0-0,1|(1379,1075)|
+10,123,Time,1312,458,31,16,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,124,123,113,1,0,0,0,0,192,0,-1--1--1,,1|(1243,517)|
+10,125,planned year of construction start distribution,1176,452,66,36,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,126,125,113,1,0,0,0,0,192,0,-1--1--1,,1|(1205,558)|
+1,127,59,116,1,0,0,0,0,192,0,-1--1--1,,1|(1404,466)|
+1,128,59,116,1,0,0,0,0,192,0,-1--1--1,,1|(1616,470)|
+1,129,58,116,1,0,0,0,0,192,0,-1--1--1,,1|(1387,720)|
+1,130,39,114,1,0,0,0,0,192,0,-1--1--1,,1|(1552,409)|
+1,131,59,117,1,0,0,0,0,192,0,-1--1--1,,1|(1664,500)|
+1,132,58,117,1,0,0,0,0,192,0,-1--1--1,,1|(1511,877)|
+1,133,68,117,1,0,0,0,0,192,0,-1--1--1,,1|(1569,519)|
+10,134,time horizon,1850,522,57,16,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,135,134,115,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,136,123,114,1,0,0,0,0,192,0,-1--1--1,,1|(1452,547)|
+1,137,35,115,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,138,134,118,1,0,0,0,0,192,0,-1--1--1,,1|(1934,520)|
+1,139,35,118,1,0,0,0,0,192,0,-1--1--1,,1|(1946,561)|
+1,140,61,118,1,0,0,0,0,192,0,-1--1--1,,1|(2103,784)|
+1,141,112,22,1,0,0,0,1,192,0,0-255-64,|||0-0-0,1|(852,1320)|
+1,142,119,22,1,0,0,0,1,192,0,255-128-0,|||0-0-0,1|(1002,1420)|
+10,143,energy procurement price,-410,758,71,18,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,144,initial planned capacity for connection,-410,758,55,27,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,145,integral result in old grids,-852,520,69,36,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,146,integral result for construction,-551,446,73,36,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,147,integral result for densification,-316,426,73,36,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,148,integral result after completion,-110,488,66,36,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,149,x1,-700,268,22,16,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,150,y1,-572,254,22,16,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,151,x2,-474,260,22,16,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,152,y3,-392,250,22,16,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,153,x4,-280,254,22,16,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,154,y5,-158,294,22,16,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,155,150,146,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,156,152,147,1,0,0,0,0,192,0,-1--1--1,,1|(-316,334)|
+10,157,time horizon,40,430,57,16,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,158,157,148,1,0,0,0,0,192,0,-1--1--1,,1|(4,492)|
+10,159,Time,-448,196,31,16,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,160,a1,-732,326,46,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,161,a2,-419,242,46,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,162,b1,-622,222,46,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,163,b2,-342,226,46,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,164,149,160,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,165,159,160,1,0,0,0,0,192,0,-1--1--1,,1|(-643,262)|
+1,166,159,162,1,0,0,0,0,192,0,-1--1--1,,1|(-544,195)|
+1,167,159,161,1,0,0,0,0,192,0,-1--1--1,,1|(-432,213)|
+1,168,159,163,1,0,0,0,0,192,0,-1--1--1,,1|(-359,198)|
+1,169,151,161,1,0,0,0,0,192,0,-1--1--1,,1|(-477,235)|
+1,170,153,163,1,0,0,0,0,192,0,-1--1--1,,1|(-268,229)|
+1,171,151,162,1,0,0,0,0,192,0,-1--1--1,,1|(-511,238)|
+10,172,discount rate,-836,436,59,16,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,173,172,146,1,0,0,0,0,192,0,-1--1--1,,1|(-696,488)|
+1,174,172,147,1,0,0,0,0,192,0,-1--1--1,,1|(-569,522)|
+1,175,172,148,1,0,0,0,0,192,0,-1--1--1,,1|(-361,563)|
+10,176,m,-183,243,46,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,177,38,176,1,0,0,0,0,192,0,-1--1--1,,1|(38,29)|
+1,178,176,147,1,0,0,0,0,192,0,-1--1--1,,1|(-287,305)|
+1,179,161,147,1,0,0,0,0,192,0,-1--1--1,,1|(-344,317)|
+1,180,163,147,1,0,0,0,0,192,0,-1--1--1,,1|(-276,345)|
+10,181,mc,-1019,305,46,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,182,construction time for distribution construction,-1360,182,69,36,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,183,182,181,1,0,0,0,0,192,0,-1--1--1,,1|(-1098,240)|
+10,184,expected share of connected demand during construction,-1248,62,77,36,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,185,184,181,1,0,0,0,0,192,0,-1--1--1,,1|(-1027,201)|
+10,186,initial planned capacity for connection,48,166,59,36,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,187,186,176,1,0,0,0,0,192,0,-1--1--1,,1|(-56,182)|
+1,188,181,146,1,0,0,0,0,192,0,-1--1--1,,1|(-804,344)|
+1,189,160,146,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+1,190,162,146,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+1,191,172,145,1,0,0,0,0,192,0,-1--1--1,,1|(-862,476)|
+10,192,y1o,-1340,474,46,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,193,x2o,-1284,644,46,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,194,y2o,-1192,430,46,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,195,193,145,1,0,0,0,0,192,0,-1--1--1,,1|(-978,582)|
+1,196,192,145,1,0,0,0,0,192,0,-1--1--1,,1|(-1118,462)|
+10,197,energy delivered,-1608,414,42,26,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,198,initial capacity per area,-1445,532,59,26,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,199,197,192,1,0,0,0,0,192,0,-1--1--1,,1|(-1448,414)|
+1,200,198,192,1,0,0,0,0,192,0,-1--1--1,,1|(-1379,510)|
+10,201,estimated demand at time horizon,-1470,278,74,26,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,202,minimum estimated demand at time horizon,-1510,348,91,26,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,203,201,194,1,0,0,0,0,192,0,-1--1--1,,1|(-1248,346)|
+1,204,202,194,1,0,0,0,0,192,0,-1--1--1,,1|(-1268,378)|
+1,205,198,194,1,0,0,0,0,192,0,-1--1--1,,1|(-1305,517)|
+10,206,time horizon,-1569,635,57,16,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,207,estimated year where maximum demand will be reached,-1672,692,83,36,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,208,206,193,1,0,0,0,0,192,0,-1--1--1,,1|(-1447,660)|
+1,209,207,193,1,0,0,0,0,192,0,-1--1--1,,1|(-1400,738)|
+1,210,206,145,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,211,mo,-1250,546,46,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,212,actual demand trend,-1778,603,61,26,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,213,212,211,1,0,0,0,0,192,0,-1--1--1,,1|(-1506,598)|
+1,214,198,211,1,0,0,0,0,192,0,-1--1--1,,1|(-1363,557)|
+1,215,211,145,1,0,0,0,0,192,0,-1--1--1,,1|(-1046,554)|
+10,216,Time,-1134,367,31,16,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,217,216,193,1,0,0,0,0,192,0,-1--1--1,,1|(-1128,511)|
+1,218,216,145,1,0,0,0,0,192,0,-1--1--1,,1|(-931,429)|
+10,219,x4o,-1319,733,46,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,220,219,145,1,0,0,0,0,192,0,-1--1--1,,1|(-982,642)|
+1,221,206,219,1,0,0,0,0,192,0,-1--1--1,,1|(-1361,768)|
+1,222,216,219,1,0,0,0,0,192,0,-1--1--1,,1|(-1190,620)|
+10,223,PV of forecasted energy costs in old grids,-670,609,69,36,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,224,PV of forecasted energy costs during construction,-475,600,73,36,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,225,PV of forecasted energy costs during densification,-288,604,73,36,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,226,PV of forecasted energy costs after completion,-158,598,66,36,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,227,145,223,1,0,0,0,0,192,0,-1--1--1,,1|(-743,554)|
+1,228,146,224,1,0,0,0,0,192,0,-1--1--1,,1|(-479,528)|
+1,229,147,225,1,0,0,0,0,192,0,-1--1--1,,1|(-294,499)|
+1,230,148,226,1,0,0,0,0,192,0,-1--1--1,,1|(-77,556)|
+10,231,energy procurement price,-890,713,73,26,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,232,initial planned capacity for connection,-728,784,59,36,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,233,231,223,1,0,0,0,0,192,0,-1--1--1,,1|(-753,703)|
+1,234,231,224,1,0,0,0,0,192,0,-1--1--1,,1|(-553,668)|
+1,235,232,224,1,0,0,0,0,192,0,-1--1--1,,1|(-550,721)|
+1,236,231,225,1,0,0,0,0,192,0,-1--1--1,,1|(-365,653)|
+1,237,232,225,1,0,0,0,0,192,0,-1--1--1,,1|(-400,743)|
+1,238,231,226,1,0,0,0,0,192,0,-1--1--1,,1|(-330,683)|
+1,239,232,226,1,0,0,0,0,192,0,-1--1--1,,1|(-307,769)|
+1,240,223,10,1,0,0,0,0,192,0,-1--1--1,,1|(-516,756)|
+1,241,224,10,1,0,0,0,0,192,0,-1--1--1,,1|(-418,722)|
+1,242,225,10,1,0,0,0,0,192,0,-1--1--1,,1|(-295,822)|
+1,243,226,10,1,0,0,0,0,192,0,-1--1--1,,1|(-222,799)|
+1,244,163,148,1,0,0,0,0,192,0,-1--1--1,,1|(-150,358)|
+10,245,b3,-66,358,46,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,246,157,245,1,0,0,0,0,192,0,-1--1--1,,1|(-18,362)|
+1,247,159,245,1,0,0,0,0,192,0,-1--1--1,,1|(-140,249)|
+1,248,245,148,1,0,0,0,0,192,0,-1--1--1,,1|(-49,438)|
+1,249,198,223,1,0,0,0,0,192,0,-1--1--1,,1|(-957,665)|
+10,250,moving time horizon window,-912,1824,60,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,251,250,19,1,0,0,0,0,192,0,-1--1--1,,1|(-849,1757)|
+1,252,20,19,1,0,0,0,0,192,0,-1--1--1,,1|(-955,1641)|
+1,253,134,113,1,0,0,0,0,192,0,-1--1--1,,1|(1320,512)|
+1,254,134,114,1,0,0,0,0,192,0,-1--1--1,,1|(1542,525)|
+1,255,134,117,1,0,0,0,0,192,0,-1--1--1,,1|(1692,547)|
+10,256,planned year of densification start,1671,393,71,26,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,257,256,117,1,0,0,0,0,192,0,-1--1--1,,1|(1617,455)|
+10,258,construction time for distribution construction,1591,248,78,27,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,259,258,117,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,260,planned year of construction start distribution,1460,448,62,27,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,261,260,117,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,262,"PV of new O&M costs",-845,1231,58,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,263,17,262,1,0,0,0,0,192,0,-1--1--1,,1|(-778,1317)|
+1,264,262,13,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,265,PV of outstanding distribution investments,-733,978,65,36,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,266,4,265,1,0,0,0,0,192,0,-1--1--1,,1|(-618,973)|
+1,267,265,13,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,268,integral result for construction,-658,1652,64,26,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,269,integral result for densification,-615,1468,65,26,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,270,269,17,1,0,0,0,0,192,0,-1--1--1,,1|(-680,1517)|
+1,271,268,17,1,0,0,0,0,192,0,-1--1--1,,1|(-749,1585)|
+1,272,2,17,1,0,0,0,0,192,0,-1--1--1,,1|(-734,1563)|
+10,273,SWITCH moving time horizon window,-570,1951,76,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,274,273,19,1,0,0,0,0,192,0,-1--1--1,,1|(-705,1750)|
+10,275,fixed time horizon,-768,1881,46,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,276,275,19,1,0,0,0,0,192,0,-1--1--1,,1|(-788,1742)|
+10,277,Time,-1034,1436,29,10,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,278,277,29,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,279,average forecasted annual energy sales per area,974,1533,74,36,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,280,22,279,1,0,0,0,0,192,0,-1--1--1,,1|(934,1460)|
+1,281,57,279,1,0,0,0,0,192,0,-1--1--1,,1|(1206,1546)|
+1,282,19,279,1,0,0,0,0,192,0,-1--1--1,,1|(839,1640)|
+10,283,PV of forecasted interests,-1410,1053,60,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,284,283,13,1,0,0,0,0,192,0,-1--1--1,,1|(-1304,909)|
+10,285,integral result for construction,1202,846,64,26,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,286,285,112,1,0,0,0,0,192,0,-1--1--1,,1|(1227,941)|
+10,287,integral result after completion,1795,934,66,26,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,288,287,119,1,0,0,0,0,192,0,-1--1--1,,1|(1889,982)|
+10,289,forecasted energy sales during densification,1613,1132,66,27,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,290,289,22,1,0,0,0,0,64,0,-1--1--1,,1|(1207,1338)|
+1,291,120,289,1,0,0,0,0,192,0,-1--1--1,,1|(1729,1000)|
+10,292,integral result for densification,1557,982,65,26,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,293,292,289,1,0,0,0,0,192,0,-1--1--1,,1|(1610,1041)|
+10,294,"PV of outstanding system-level investments",-582,1341,65,36,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,295,PV of outstanding storage investments,-235,1725,74,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,296,PV of outstanding generation investments,-61,1723,65,36,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,297,PV of outstanding transmission investments,114,1731,65,36,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,298,295,294,1,0,0,0,0,192,0,-1--1--1,,1|(-454,1568)|
+1,299,296,294,1,0,0,0,0,192,0,-1--1--1,,1|(-463,1515)|
+1,300,297,294,1,0,0,0,0,192,0,-1--1--1,,1|(-438,1491)|
+10,301,year of construction start storage,-149,1436,77,26,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,302,301,295,1,0,0,0,0,192,0,-1--1--1,,1|(-165,1611)|
+10,303,Time,-174,1831,29,10,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,304,303,295,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+1,305,303,296,1,0,0,0,0,192,0,-1--1--1,,1|(-69,1772)|
+1,306,303,297,1,0,0,0,0,192,0,-1--1--1,,1|(98,1823)|
+10,307,year of construction start transmission,378,1618,77,26,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,308,307,297,1,0,0,0,0,192,0,-1--1--1,,1|(229,1660)|
+10,309,discount rate,-77,1540,59,16,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,310,309,297,1,0,0,0,0,192,0,-1--1--1,,1|(-16,1670)|
+1,311,309,296,1,0,0,0,0,192,0,-1--1--1,,1|(-129,1623)|
+1,312,309,295,1,0,0,0,0,192,0,-1--1--1,,1|(-227,1668)|
+10,313,year of construction start generation,371,1760,75,18,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,314,313,296,1,0,0,0,0,64,0,-1--1--1,,1|(151,1776)|
+1,315,294,13,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,316,"PV of new O&M costs at system level",-1253,1859,77,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,317,"PV of storage O&M",-1367,2044,50,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,318,317,316,1,0,0,0,0,192,0,-1--1--1,,1|(-1304,1974)|
+1,319,20,317,1,0,0,0,0,192,0,-1--1--1,,1|(-1082,2029)|
+10,320,year of storage commissioning,-1293,2172,61,26,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,321,320,317,1,0,0,0,0,192,0,-1--1--1,,1|(-1393,2105)|
+1,322,6,317,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+1,323,316,13,1,0,0,0,0,192,0,-1--1--1,,1|(-1450,940)|
+10,324,amortization start year,-848,2061,71,29,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,325,amortization period,-705,2067,71,29,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,326,credit transmission,338,1502,52,18,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,327,326,297,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,328,credit generation,486,1851,44,18,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,329,328,296,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,330,credit storage,-226,1488,59,10,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,331,330,295,1,0,0,0,0,64,0,-1--1--1,,1|(-199,1579)|
+10,332,credit for distribution construction,-109,1039,52,36,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,333,332,4,1,0,0,0,0,192,0,-1--1--1,,1|(-195,1049)|
+10,334,PV of interest payments transmission,257,1290,51,36,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,335,amortization period,533,1692,50,18,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,336,335,297,1,0,0,0,0,64,0,-1--1--1,,1|(365,1758)|
+1,337,335,296,1,0,0,0,0,192,0,-1--1--1,,1|(257,1748)|
+1,338,335,295,1,0,0,0,0,192,0,-1--1--1,,1|(183,1805)|
+1,339,335,334,1,0,0,0,0,192,0,-1--1--1,,1|(376,1290)|
+1,340,309,334,1,0,0,0,0,192,0,-1--1--1,,1|(112,1319)|
+10,341,amortization period,-357,1179,50,18,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,342,341,4,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,343,Time,228,1383,29,10,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,344,PV of interest payments generation,253,1192,78,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,345,PV of interest payments storage,274,1076,66,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,346,PV of interest payments distribution per area,-268,1340,76,36,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,347,335,345,1,0,0,0,0,192,0,-1--1--1,,1|(616,1287)|
+1,348,309,344,1,0,0,0,0,192,0,-1--1--1,,1|(96,1284)|
+1,349,309,345,1,0,0,0,0,192,0,-1--1--1,,1|(93,1134)|
+1,350,309,346,1,0,0,0,0,192,0,-1--1--1,,1|(-231,1473)|
+1,351,326,334,1,0,0,0,0,192,0,-1--1--1,,1|(350,1391)|
+1,352,328,344,1,0,0,0,0,192,0,-1--1--1,,1|(618,1484)|
+1,353,330,345,1,0,0,0,0,192,0,-1--1--1,,1|(42,1176)|
+1,354,341,346,1,0,0,0,0,192,0,-1--1--1,,1|(-336,1265)|
+1,355,332,346,1,0,0,0,0,192,0,-1--1--1,,1|(-184,1258)|
+10,356,"PV of interests for new system-level investments",-87,942,66,36,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,357,345,356,1,0,0,0,0,192,0,-1--1--1,,1|(154,987)|
+1,358,344,356,1,0,0,0,0,192,0,-1--1--1,,1|(162,940)|
+1,359,334,356,1,0,0,0,0,192,0,-1--1--1,,1|(131,927)|
+1,360,356,13,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,361,PV of interest payments distribution,-747,1046,51,36,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,362,361,13,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,363,Connected demand at densification start,1886,404,78,18,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,364,Connected demand at densification start,2238,580,78,18,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,365,Connected demand during densification,1292,38,77,18,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,366,365,38,0,1,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,367,Connected demand during densification,1886,404,77,18,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,368,Connected demand during densification,2238,580,77,18,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,369,energy delivered,2095,237,42,26,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,370,369,52,1,0,0,0,0,192,0,-1--1--1,,1|(1923,276)|
+1,371,369,59,1,0,0,0,0,192,0,-1--1--1,,1|(2256,376)|
+10,372,initial committed anchor loads per area,2402,683,67,36,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,373,initial connected anchor loads per area,2371,815,66,36,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,374,372,59,1,0,0,0,0,192,0,-1--1--1,,1|(2391,595)|
+1,375,373,59,1,0,0,0,0,192,0,-1--1--1,,1|(2400,736)|
+10,376,Connected anchor loads,2238,580,52,18,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,377,372,52,1,0,0,0,0,192,0,-1--1--1,,1|(2506,395)|
+1,378,373,52,1,0,0,0,0,192,0,-1--1--1,,1|(2590,404)|
+10,379,initial capacity per area,2810,492,59,26,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,380,379,59,1,0,0,0,0,192,0,-1--1--1,,1|(2403,507)|
+10,381,overall utilization,2663,267,64,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,382,369,381,1,0,0,0,0,192,0,-1--1--1,,1|(2556,199)|
+1,383,47,381,1,0,0,0,0,192,0,-1--1--1,,1|(2545,260)|
+1,384,372,381,1,0,0,0,0,192,0,-1--1--1,,1|(2576,296)|
+1,385,373,381,1,0,0,0,0,192,0,-1--1--1,,1|(2606,324)|
+1,386,379,381,1,0,0,0,0,192,0,-1--1--1,,1|(2795,346)|
+1,387,346,361,1,0,0,0,0,192,0,-1--1--1,,1|(-585,1081)|
+10,388,"PV of generation O&M",-1632,1804,61,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,389,"PV of transmission O&M",-1541,1942,68,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,390,388,316,1,0,0,0,0,192,0,-1--1--1,,1|(-1475,1867)|
+1,391,389,316,1,0,0,0,0,192,0,-1--1--1,,1|(-1349,1941)|
+1,392,330,317,1,0,0,0,0,192,0,-1--1--1,,1|(-756,2087)|
+1,393,12,317,1,0,0,0,0,192,0,-1--1--1,,1|(-1066,1897)|
+1,394,12,388,1,0,0,0,0,192,0,-1--1--1,,1|(-1632,1638)|
+1,395,12,389,1,0,0,0,0,192,0,-1--1--1,,1|(-1449,1685)|
+1,396,328,388,1,0,0,0,0,192,0,-1--1--1,,1|(-1566,2015)|
+1,397,326,389,1,0,0,0,0,192,0,-1--1--1,,1|(-871,2378)|
+10,398,amortization period,-1736,2109,50,18,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,399,398,317,1,0,0,0,0,64,0,-1--1--1,,1|(-1494,2108)|
+1,400,398,389,1,0,0,0,0,192,0,-1--1--1,,1|(-1584,2043)|
+1,401,398,388,1,0,0,0,0,192,0,-1--1--1,,1|(-1644,1860)|
+1,402,307,389,1,0,0,0,0,192,0,-1--1--1,,1|(-1117,2377)|
+1,403,313,388,1,0,0,0,0,192,0,-1--1--1,,1|(-1255,2495)|
+1,404,6,389,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,405,Time,-1541,1986,29,10,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,406,405,389,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+1,407,6,388,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,408,Time,-1632,1848,29,10,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,409,408,388,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,410,initial connected anchor loads per area,545,399,66,36,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,411,410,93,1,0,0,0,0,192,0,-1--1--1,,1|(643,440)|
+1,412,410,89,1,0,0,0,0,192,0,-1--1--1,,1|(923,517)|
+1,413,410,94,1,0,0,0,0,192,0,-1--1--1,,1|(880,677)|
+10,414,initial connected anchor loads per area,-1555,501,66,36,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,415,414,192,1,0,0,0,0,192,0,-1--1--1,,1|(-1414,502)|
+1,416,414,194,1,0,0,0,0,192,0,-1--1--1,,1|(-1278,486)|
+1,417,414,211,1,0,0,0,0,192,0,-1--1--1,,1|(-1305,572)|
+1,418,414,223,1,0,0,0,0,192,0,-1--1--1,,1|(-832,673)|
+1,419,19,93,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+1,420,410,80,1,0,0,0,0,192,0,-1--1--1,,1|(813,857)|
+10,421,planned year of densification start,1002,1136,71,26,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,422,421,112,1,0,0,0,0,192,0,-1--1--1,,1|(1145,1127)|
+1,423,421,289,1,0,0,0,0,192,0,-1--1--1,,1|(1489,1252)|
+1,424,421,119,1,0,0,0,0,192,0,-1--1--1,,1|(1795,1259)|
+1,425,421,80,1,0,0,0,0,192,0,-1--1--1,,1|(902,1100)|
+10,426,Time,1181,1178,29,10,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,427,426,112,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+1,428,426,289,1,0,0,0,0,192,0,-1--1--1,,1|(1422,1215)|
+1,429,426,119,1,0,0,0,0,192,0,-1--1--1,,1|(1613,1256)|
+10,430,initial committed anchor loads per area,747,299,67,36,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,431,430,89,1,0,0,0,0,192,0,-1--1--1,,1|(1003,509)|
+1,432,430,93,1,0,0,0,0,192,0,-1--1--1,,1|(695,369)|
+1,433,430,94,1,0,0,0,0,192,0,-1--1--1,,1|(954,685)|
+1,434,120,89,1,0,0,0,0,192,0,-1--1--1,,1|(1258,621)|
+1,435,120,94,1,0,0,0,0,192,0,-1--1--1,,1|(1095,684)|
+1,436,120,93,1,0,0,0,0,192,0,-1--1--1,,1|(867,557)|
+10,437,initial planned capacity for connection,-1768,364,59,36,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,438,initial committed anchor loads per area,-1818,503,67,36,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,439,437,194,1,0,0,0,0,192,0,-1--1--1,,1|(-1312,391)|
+1,440,438,194,1,0,0,0,0,192,0,-1--1--1,,1|(-1361,412)|
+1,441,437,192,1,0,0,0,0,192,0,-1--1--1,,1|(-1425,442)|
+1,442,438,192,1,0,0,0,0,192,0,-1--1--1,,1|(-1584,555)|
+1,443,437,211,1,0,0,0,0,192,0,-1--1--1,,1|(-1307,489)|
+1,444,438,211,1,0,0,0,0,192,0,-1--1--1,,1|(-1373,596)|
+1,445,437,223,1,0,0,0,0,192,0,-1--1--1,,1|(-743,551)|
+1,446,438,223,1,0,0,0,0,192,0,-1--1--1,,1|(-1073,748)|
+1,447,430,80,1,0,0,0,0,192,0,-1--1--1,,1|(1033,855)|
+1,448,67,80,1,0,0,0,0,192,0,-1--1--1,,1|(1001,1000)|
+10,449,integral result in old grids,888,868,66,26,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,450,449,80,1,0,0,0,0,192,0,-1--1--1,,1|(887,937)|
+1,451,82,81,1,0,0,0,0,192,0,-1--1--1,,1|(930,91)|
+1,452,83,81,1,0,0,0,0,192,0,-1--1--1,,1|(1016,93)|
+1,453,84,81,1,0,0,0,0,192,0,-1--1--1,,1|(1132,124)|
+10,454,average forecasted annual energy sales,963,1654,74,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,455,279,454,1,0,0,0,0,192,0,-1--1--1,,1|(1032,1586)|
+10,456,overall demand trend,503,99,59,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,457,81,456,1,0,0,0,0,192,0,-1--1--1,,1|(726,88)|
+10,458,estimated share at time horizon in old grids,1212,767,70,36,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,459,89,458,1,0,0,0,0,192,0,-1--1--1,,1|(1181,682)|
+10,460,target capacity per area,1423,720,60,26,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,461,460,458,1,0,0,0,0,192,0,-1--1--1,,1|(1353,793)|
+10,462,time until investment generation,544,1087,78,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,463,462,344,1,0,0,0,0,192,0,-1--1--1,,1|(354,1119)|
+10,464,annual amortization generation,609,1166,74,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,465,335,464,1,0,0,0,0,192,0,-1--1--1,,1|(670,1252)|
+10,466,time since investment start generation,350,927,61,36,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,467,466,344,1,0,0,0,0,192,0,-1--1--1,,1|(392,1037)|
+10,468,time until amortization generation,491,937,49,36,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,469,468,344,1,0,0,0,0,192,0,-1--1--1,,1|(444,1070)|
+1,470,464,344,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+1,471,328,464,1,0,0,0,0,192,0,-1--1--1,,1|(660,1371)|
+10,472,year of construction start generation,455,823,77,26,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,473,Time,614,941,31,16,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,474,473,462,1,0,0,0,0,192,0,-1--1--1,,1|(637,1045)|
+1,475,472,466,1,0,0,0,0,192,0,-1--1--1,,1|(368,868)|
+1,476,472,462,1,0,0,0,0,192,0,-1--1--1,,1|(585,989)|
+1,477,473,466,1,0,0,0,0,192,0,-1--1--1,,1|(468,877)|
+1,478,472,468,1,0,0,0,0,192,0,-1--1--1,,1|(503,868)|
+1,479,473,468,1,0,0,0,0,192,0,-1--1--1,,1|(559,929)|
+1,480,335,468,1,0,0,0,0,192,0,-1--1--1,,1|(569,1159)|
+1,481,335,344,1,0,0,0,0,192,0,-1--1--1,,1|(463,1255)|
+10,482,time since investment start storage,33,1212,61,36,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,483,time until investment storage,-9,1287,78,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,484,annual amortization storage,119,1261,74,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,485,482,345,1,0,0,0,0,192,0,-1--1--1,,1|(190,1063)|
+1,486,483,345,1,0,0,0,0,192,0,-1--1--1,,1|(172,1108)|
+1,487,484,345,1,0,0,0,0,192,0,-1--1--1,,1|(169,1126)|
+10,488,time until amortization storage,63,1344,76,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,489,488,345,1,0,0,0,0,192,0,-1--1--1,,1|(86,1147)|
+1,490,343,488,1,0,0,0,0,192,0,-1--1--1,,1|(153,1395)|
+1,491,343,482,1,0,0,0,0,192,0,-1--1--1,,1|(143,1240)|
+1,492,343,483,1,0,0,0,0,192,0,-1--1--1,,1|(142,1322)|
+1,493,335,484,1,0,0,0,0,192,0,-1--1--1,,1|(137,1366)|
+1,494,330,484,1,0,0,0,0,192,0,-1--1--1,,1|(-44,1340)|
+1,495,301,482,1,0,0,0,0,192,0,-1--1--1,,1|(-50,1276)|
+1,496,301,483,1,0,0,0,0,192,0,-1--1--1,,1|(-90,1327)|
+1,497,301,488,1,0,0,0,0,192,0,-1--1--1,,1|(10,1352)|
+1,498,335,488,1,0,0,0,0,192,0,-1--1--1,,1|(330,1426)|
+10,499,annual amortization transmission,462,1382,74,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,500,time since investment start transmission,505,1450,61,36,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,501,time until amortization transmission,508,1537,50,36,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,502,time until investment transmission,305,1454,78,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,503,502,334,1,0,0,0,0,192,0,-1--1--1,,1|(312,1380)|
+1,504,499,334,1,0,0,0,0,192,0,-1--1--1,,1|(384,1316)|
+1,505,500,334,1,0,0,0,0,192,0,-1--1--1,,1|(398,1329)|
+1,506,501,334,1,0,0,0,0,192,0,-1--1--1,,1|(357,1358)|
+1,507,326,499,1,0,0,0,0,192,0,-1--1--1,,1|(391,1414)|
+1,508,335,499,1,0,0,0,0,192,0,-1--1--1,,1|(559,1409)|
+1,509,343,501,1,0,0,0,0,192,0,-1--1--1,,1|(366,1557)|
+1,510,343,502,1,0,0,0,0,192,0,-1--1--1,,1|(251,1412)|
+1,511,343,500,1,0,0,0,0,192,0,-1--1--1,,1|(409,1461)|
+1,512,307,501,1,0,0,0,0,192,0,-1--1--1,,1|(505,1586)|
+1,513,307,500,1,0,0,0,0,192,0,-1--1--1,,1|(455,1502)|
+1,514,307,502,1,0,0,0,0,192,0,-1--1--1,,1|(278,1482)|
+10,515,amortization period,532,1605,50,18,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,516,515,501,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,517,time until investment distribution,-200,1118,78,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,518,time since investment start distribution,-190,1168,61,36,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,519,annual amortization distribution,-75,1104,74,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,520,time until amortization distribution,-75,1180,49,36,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,521,517,346,1,0,0,0,0,192,0,-1--1--1,,1|(-227,1255)|
+1,522,518,346,1,0,0,0,0,192,0,-1--1--1,,1|(-202,1245)|
+1,523,519,346,1,0,0,0,0,192,0,-1--1--1,,1|(-154,1254)|
+1,524,520,346,1,0,0,0,0,192,0,-1--1--1,,1|(-156,1325)|
+1,525,3,517,1,0,0,0,0,192,0,-1--1--1,,1|(-274,1168)|
+1,526,3,518,1,0,0,0,0,192,0,-1--1--1,,1|(-261,1214)|
+1,527,3,520,1,0,0,0,0,192,0,-1--1--1,,1|(-149,1221)|
+1,528,8,520,1,0,0,0,0,192,0,-1--1--1,,1|(16,1112)|
+1,529,8,517,1,0,0,0,0,192,0,-1--1--1,,1|(-25,1068)|
+1,530,8,518,1,0,0,0,0,192,0,-1--1--1,,1|(1,1161)|
+1,531,332,519,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,532,341,519,1,0,0,0,0,192,0,-1--1--1,,1|(-166,1196)|
+10,533,amortization period,-75,1234,50,18,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,534,533,520,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,535,Time,-49,797,31,16,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,536,average annual forecasted energy costs,92,776,67,36,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,537,10,536,1,0,0,0,0,192,0,-1--1--1,,1|(44,833)|
+1,538,535,536,1,0,0,0,0,192,0,-1--1--1,,1|(28,712)|
+1,539,157,536,1,0,0,0,0,192,0,-1--1--1,,1|(163,678)|
+10,540,planned year of densification start,122,645,71,26,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,541,540,224,1,0,0,0,0,192,0,-1--1--1,,1|(-135,702)|
+1,542,540,225,1,0,0,0,0,192,0,-1--1--1,,1|(-117,666)|
+1,543,540,226,1,0,0,0,0,192,0,-1--1--1,,1|(-83,643)|
+1,544,535,224,1,0,0,0,0,192,0,-1--1--1,,1|(-450,745)|
+1,545,535,225,1,0,0,0,0,192,0,-1--1--1,,1|(-233,740)|
+1,546,535,226,1,0,0,0,0,192,0,-1--1--1,,1|(-116,754)|
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Ageing
+$-1--1--1,0,|12||-1--1--1|-1--1--1|-1--1--1|-1--1--1|-1--1--1|96,96,100,0
+10,1,Total age of HP,596,-463,56,26,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,2,Total age of DHC connections,1394,-468,62,26,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,3,initial average age of HP,493,-209,54,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,4,initial average age of DHC connections,1214,-244,76,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+12,5,48,277,-465,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,6,8,5,100,0,0,22,0,192,0,-1--1--1,,1|(347,-465)|
+1,7,8,1,4,0,0,22,0,192,0,-1--1--1,,1|(479,-465)|
+11,8,0,413,-465,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,9,increase in age of HPs,413,-431,66,26,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+12,10,48,857,-463,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,11,13,1,100,0,0,22,0,192,0,-1--1--1,,1|(697,-463)|
+1,12,13,10,4,0,0,22,0,192,0,-1--1--1,,1|(801,-463)|
+11,13,0,749,-463,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,14,decrease in age of HPs,749,-429,59,26,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+12,15,48,1163,-468,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,16,18,15,100,0,0,22,0,192,0,-1--1--1,,1|(1209,-468)|
+1,17,18,2,4,0,0,22,0,192,0,-1--1--1,,1|(1295,-468)|
+11,18,0,1252,-468,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,19,increase in age of DHC connections,1252,-434,66,26,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+12,20,48,1741,-468,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,21,23,2,100,0,0,22,0,192,0,-1--1--1,,1|(1521,-468)|
+1,22,23,20,4,0,0,22,0,192,0,-1--1--1,,1|(1665,-468)|
+11,23,0,1593,-468,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,24,decrease in age of DHC connections,1593,-434,68,26,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,25,initial number of HPs,327,-216,58,26,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,26,initial total age of HPs,433,-316,65,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,27,26,1,1,0,0,0,0,192,1,-1--1--1,,1|(569,-378)|
+1,28,25,26,1,0,0,0,0,192,0,-1--1--1,,1|(375,-259)|
+1,29,3,26,1,0,0,0,0,192,0,-1--1--1,,1|(493,-267)|
+10,30,ageing rate,345,-598,46,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,31,ageing rate,1168,-596,52,16,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,32,Buildings with decentral HP,206,-150,58,26,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,33,average age of HP,647,-312,66,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,34,1,33,1,0,0,0,0,192,0,-1--1--1,,1|(630,-356)|
+1,35,32,33,1,0,0,0,0,192,0,-1--1--1,,1|(379,-95)|
+1,36,33,14,1,0,0,0,0,192,0,-1--1--1,,1|(746,-349)|
+1,37,30,9,1,0,0,0,0,192,0,-1--1--1,,1|(407,-524)|
+1,38,32,9,1,0,0,0,0,192,0,-1--1--1,,1|(287,-352)|
+10,39,initial connected buildings,1394,-254,66,26,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,40,initial total age of DHC connections,1366,-347,65,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,41,4,40,1,0,0,0,0,192,0,-1--1--1,,1|(1333,-294)|
+1,42,39,40,1,0,0,0,0,192,0,-1--1--1,,1|(1400,-292)|
+10,43,DHC to HP,749,-385,50,10,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,44,average lifetime of HP,802,-90,60,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,45,number of HPs replaced,797,-238,56,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,46,32,45,1,0,0,0,0,192,0,-1--1--1,,1|(500,-37)|
+1,47,44,45,1,0,0,0,0,192,0,-1--1--1,,1|(838,-144)|
+1,48,45,14,1,0,0,0,0,192,0,-1--1--1,,1|(825,-363)|
+1,49,40,2,1,0,0,0,0,192,1,-1--1--1,,1|(1409,-397)|
+1,50,31,19,1,0,0,0,0,192,0,-1--1--1,,1|(1245,-529)|
+10,51,Buildings connected to DHC,1067,-116,70,26,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,52,51,19,1,0,0,0,0,192,0,-1--1--1,,1|(1116,-314)|
+10,53,average age of DHC contracts,1561,-304,55,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,54,2,53,1,0,0,0,0,192,0,-1--1--1,,1|(1487,-346)|
+1,55,51,53,1,0,0,0,0,192,0,-1--1--1,,1|(1501,-183)|
+1,56,53,24,1,0,0,0,0,192,0,-1--1--1,,1|(1609,-363)|
+10,57,number of DHC contracts renewed,1674,-235,69,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,58,33,45,1,0,0,0,0,192,0,-1--1--1,,1|(696,-236)|
+10,59,DHC contract duration,1722,-93,50,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,60,59,57,1,0,0,0,0,192,0,-1--1--1,,1|(1744,-169)|
+1,61,51,57,1,0,0,0,0,192,0,-1--1--1,,1|(1379,-12)|
+1,62,53,57,1,0,0,0,0,192,0,-1--1--1,,1|(1582,-242)|
+1,63,57,24,1,0,0,0,0,192,0,-1--1--1,,1|(1682,-368)|
+10,64,Total age of oil heating systems,549,173,61,26,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+12,65,48,224,175,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,66,68,65,100,0,0,22,0,192,0,-1--1--1,,1|(294,175)|
+1,67,68,64,4,0,0,22,0,192,0,-1--1--1,,1|(427,175)|
+11,68,0,361,175,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,69,increase in age of oil heating systems,361,209,76,26,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+12,70,48,866,173,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,71,73,64,100,0,0,22,0,192,0,-1--1--1,,1|(668,173)|
+1,72,73,70,4,0,0,22,0,192,0,-1--1--1,,1|(797,173)|
+11,73,0,733,173,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,74,decrease in age of oil heating systems,733,207,78,26,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,75,average age of oil heating systems,618,309,65,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,76,64,75,1,0,0,0,0,192,0,-1--1--1,,1|(569,266)|
+10,77,initial total age of oil heating systems,380,324,75,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,78,77,64,1,0,0,0,0,192,1,-1--1--1,,1|(521,260)|
+10,79,initial average age of oil heating systems,434,414,76,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,80,79,77,1,0,0,0,0,192,0,-1--1--1,,1|(467,362)|
+10,81,Buildings with oil heating,263,482,58,26,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,82,ageing rate,329,72,52,16,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,83,82,69,1,0,0,0,0,192,0,-1--1--1,,1|(385,133)|
+1,84,81,69,1,0,0,0,0,192,0,-1--1--1,,1|(180,263)|
+1,85,81,75,1,0,0,0,0,192,0,-1--1--1,,1|(533,515)|
+10,86,number of oil heating systems replaced,738,434,61,36,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,87,81,86,1,0,0,0,0,192,0,-1--1--1,,1|(451,596)|
+1,88,75,74,1,0,0,0,0,192,0,-1--1--1,,1|(706,277)|
+1,89,86,74,1,0,0,0,0,192,0,-1--1--1,,1|(774,303)|
+10,90,initial buildings with oil heating,269,392,63,26,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,91,90,77,1,0,0,0,0,192,0,-1--1--1,,1|(296,343)|
+10,92,average lifetime of oil heating systems,749,599,71,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,93,92,86,1,0,0,0,0,192,0,-1--1--1,,1|(772,507)|
+10,94,fossil fuels banned,1068,571,46,26,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,95,Total age of gas heating systems,1428,167,61,26,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+12,96,48,1106,164,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,97,99,96,100,0,0,22,0,192,0,-1--1--1,,1|(1175,164)|
+1,98,99,95,4,0,0,22,0,192,0,-1--1--1,,1|(1307,164)|
+11,99,0,1241,164,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,100,increase in age of gas heating systems,1241,198,74,26,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+12,101,48,1755,167,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,102,104,95,100,0,0,22,0,192,0,-1--1--1,,1|(1550,167)|
+1,103,104,101,4,0,0,22,0,192,0,-1--1--1,,1|(1684,167)|
+11,104,0,1617,167,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,105,decrease in age of gas heating systems,1617,201,74,26,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,106,average age of gas heating systems,1525,282,69,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,107,95,106,1,0,0,0,0,192,0,-1--1--1,,1|(1453,241)|
+1,108,106,105,1,0,0,0,0,192,0,-1--1--1,,1|(1629,266)|
+10,109,initial total age of gas heating systems,1318,345,78,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,110,109,95,1,0,0,0,0,192,1,-1--1--1,,1|(1388,271)|
+10,111,initial average age of gas heating systems,1394,429,76,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,112,111,109,1,0,0,0,0,192,0,-1--1--1,,1|(1420,383)|
+10,113,initial buildings with gas heating,1234,427,66,26,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,114,113,109,1,0,0,0,0,192,0,-1--1--1,,1|(1235,371)|
+10,115,Buildings with gas heating,1205,548,58,26,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,116,ageing rate,1180,84,52,16,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,117,116,100,1,0,0,0,0,192,0,-1--1--1,,1|(1225,119)|
+1,118,115,100,1,0,0,0,0,192,0,-1--1--1,,1|(1086,387)|
+1,119,115,106,1,0,0,0,0,192,0,-1--1--1,,1|(1461,515)|
+10,120,number of gas heating systems replaced,1635,438,61,36,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,121,average lifetime of gas heating systems,1644,574,74,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,122,121,120,1,0,0,0,0,192,0,-1--1--1,,1|(1685,529)|
+1,123,115,120,1,0,0,0,0,192,0,-1--1--1,,1|(1335,601)|
+1,124,120,105,1,0,0,0,0,192,0,-1--1--1,,1|(1686,279)|
+10,125,excess age of oil heating systems,550,677,61,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,126,75,125,1,0,0,0,0,192,0,-1--1--1,,1|(638,599)|
+1,127,92,125,1,0,0,0,0,192,0,-1--1--1,,1|(708,656)|
+10,128,excess age of gas heating systems,1477,648,64,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,129,106,128,1,0,0,0,0,192,0,-1--1--1,,1|(1538,584)|
+1,130,121,128,1,0,0,0,0,192,0,-1--1--1,,1|(1631,632)|
+10,131,lookup excess age of oil heating systems,301,722,75,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,132,lookup excess age of gas heating systems,1227,686,75,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,133,dynamic AT oil,450,755,55,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,134,131,133,1,0,0,0,0,192,0,-1--1--1,,1|(349,784)|
+1,135,125,133,1,0,0,0,0,192,0,-1--1--1,,1|(559,741)|
+10,136,dynamic AT gas,1407,741,59,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,137,132,136,1,0,0,0,0,192,0,-1--1--1,,1|(1316,744)|
+1,138,128,136,1,0,0,0,0,192,0,-1--1--1,,1|(1477,707)|
+1,139,92,133,1,0,0,0,0,192,0,-1--1--1,,1|(677,750)|
+1,140,121,136,1,0,0,0,0,192,0,-1--1--1,,1|(1584,745)|
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Outputs
+$-1--1--1,0,|12||-1--1--1|-1--1--1|-1--1--1|-1--1--1|-1--1--1|96,96,67,0
+12,1,0,557,700,300,200,0,15,0,0,1,0,0,0,0,0,0,0,0,0
+price
+12,2,0,1177,723,300,200,0,15,0,0,1,0,0,0,0,0,0,0,0,0
+Finances
+12,3,0,552,296,300,200,0,15,0,0,1,0,0,0,0,0,0,0,0,0
+Market_share
+12,4,0,1180,291,300,200,0,15,0,0,1,0,0,0,0,0,0,0,0,0
+emissions
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*View 7
+$-1--1--1,0,|12||-1--1--1|-1--1--1|-1--1--1|-1--1--1|-1--1--1|96,96,100,0
+12,1,0,216,121,80,65,0,79,0,0,0,0,0,0,0,0,0,0,0,0
+SWITCH availability utility,0,1,1
+///---\\\
+:GRAPH price
+:TITLE DH price
+:SCALE
+:VAR DHC price
+:DATASET 
+:LINE-WIDTH 1
+:VAR indicated DHC price
+:DATASET 
+:LINE-WIDTH 1
+
+:GRAPH Cash_flow
+:TITLE Utility's annual cash flow
+:SCALE
+:VAR annual cash flow
+:DATASET 
+:LINE-WIDTH 1
+
+:GRAPH Reserve_and_Deficit
+:TITLE Reserve and Deficit
+:SCALE
+:VAR Cash reserve
+:DATASET 
+:LINE-WIDTH 1
+:VAR Deficit
+:DATASET 
+:LINE-WIDTH 1
+
+:GRAPH Finances
+:TITLE Cash flow, reserve and deficit
+:SCALE
+:VAR annual cash flow
+:DATASET 
+:LINE-WIDTH 1
+:SCALE
+:VAR Reserve or Deficit
+:DATASET 
+:LINE-WIDTH 1
+
+:GRAPH Market_share
+:TITLE Market share of heating systems
+:SCALE
+:VAR overall market share of heating systems[heating system]
+:DATASET 
+:LINE-WIDTH 1
+
+:GRAPH emissions
+:TITLE GHG emissions from heating
+:SCALE
+:VAR overall GHG emissions from heating
+:DATASET 
+:LINE-WIDTH 1
+:L<%^E!@
+4:Time
+5:overall demand trend
+6:area0
+6:area1
+6:area2
+6:area3
+6:area4
+6:area5
+6:DHC
+6:gas
+6:HP
+6:oil
+9:E7d_TESearly_env
+19:46,0
+24:2018
+25:2072
+26:2072
+57:1
+54:0
+55:0
+82:1
+86:0
+59:0
+56:0
+58:0
+71:0
+110:0
+111:0
+44:0
+46:0
+45:7
+49:0
+50:1
+51:
+52:
+53:
+43:E0_Reference.xlsx
+47:
+48:
+60:
+61:0
+62:1
+63:0
+64:0
+65:0
+66:0
+67:0
+68:0
+69:0
+70:1
+23:0
+18:sensitivity.vsc
+20:sensitivity_save.lst
+15:0,0,0,0,0,0
+27:0,
+34:0,
+42:0
+72:0
+73:0
+95:0
+96:0
+97:0
+77:0
+78:0
+102:1
+93:0
+94:0
+92:0
+91:0
+90:0
+87:0
+75:
+43:E0_Reference.xlsx
+103:8,8,8,3,8
+105:0,0,0,0,0,0,0,0,0,0
+104:Vensim Sans|12||0-0-0|0-0-0|-1--1--1|0-0-255|192-192-192|-1--1--1
